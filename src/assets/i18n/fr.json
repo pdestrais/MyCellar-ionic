@@ -1,0 +1,9 @@
+{
+  "title" : "Exemple Internationalisation",   
+  "segment": {    
+      "puppies": "Chiens",
+      "kittens": "Chats"
+  },
+  "english":"Anglais",
+  "french":"Français"
+}

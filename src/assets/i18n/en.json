@@ -1,0 +1,82 @@
+{
+  "title" : "MyCellar",
+  "page" : {
+    "config":"configuration",
+    "vin":"wine",
+    "appellation":"appellation",
+    "origin":"origin",
+    "type":"type",
+    "report":"report",
+    "stats":"statistics",
+    "search":"search"
+  },
+  "config":{
+    "dbServerURL": "DB server URL",
+    "language" : "language"
+  },
+  "wine":{
+    "name":"name",
+    "year":"year",
+    "type":"type",
+    "origin":"origin",
+    "appellation":"appellation",
+    "purchaseDate":"purchase date",
+    "bottlesPurchase":"# bottles bought",
+    "bottlesLeft":"# bottles left",
+    "comment":"comment",
+    "history":"history",
+    "location":"location",
+    "price":"price",
+    "contains":"contains",
+    "wineDeleted":"The wine is deleted",
+    "wineNotDeleted":"The wine is not deleted",
+    "addComment":"Add Comment",
+    "priceFormatInvalid":"format is invalid (ex : 15.0)",
+    "addedOn":"added on",
+    "addedExtractedOn":"Wine added or extracted on",
+    "difference":"difference",
+    "or":"or",
+    "minmax":"must 4 digit length"
+  },
+  "appellation":{
+    "long":"long",
+    "short":"short"
+  },
+  "origin":{
+    "region":"region",
+    "country":"country"
+  },
+  "stats":{
+    "from":"from",
+    "to":"to"
+  },
+  "search":{
+    "inStock":"wine in stock",
+    "outOfStock":"wine out of stock"
+  },
+  "general":{
+    "save":"save",
+    "confirm":"confirm",
+    "suppress":"suppress",
+    "addComment":"add comment",
+    "error":"error",
+    "name":"name",
+    "view":"view",
+    "show":"show",
+    "expand":"expand",
+    "search":"search",
+    "newConfigSaved":"The new configuration is saved successfully",
+    "newConfigNotSaved":"Error in storing the new configuration, please try again.",
+    "DBError":"there is a Database problem, please contact application developer",
+    "invalidData":"Invalid data, please correct them",
+    "dataSaved":"your data are saved",
+    "sure":"Are you sure ?",
+    "cancel":"Cancel",
+    "ok":"ok",
+    "required":"is required"
+  },
+  "english":"English",
+  "french":"French",
+  "red":"Red",
+  "white":"White"
+}

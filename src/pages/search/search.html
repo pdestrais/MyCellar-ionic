@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+<!--     <ion-buttons start>
+      <button ion-button icon-left>
+        <ion-icon name="menu"></ion-icon>
+        Menu
+      </button>
+    </ion-buttons>
+ -->    <ion-title>
+      Search
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding id="page4">
+  <div id="search-container1">
+     <ion-searchbar placeholder="" name="" id="search-search1" [(ngModel)]="searchTerm" [formControl]="searchControl" (ionInput)="onSearchInput()"></ion-searchbar>
+<!--    <ion-searchbar placeholder="" name="" id="search-search1"></ion-searchbar>
+ -->  </div>
+  <div *ngIf="loading" class="spinner-container">
+    <ion-spinner></ion-spinner>
+  </div>
+  <form id="search-form2">
+    <ion-item id="search-radio1">
+      <ion-label>
+        {{ 'search.inStock' | translate }}
+      </ion-label>
+      <ion-toggle [checked]="isInStock" (ionChange)="onInStockChange()"></ion-toggle>
+    </ion-item>
+  </form>
+
+  <ion-list>
+      <ion-item *ngFor="let item of items" on-click="goToVin(item._id)">
+          {{item.nom}} - {{item.annee}}
+          <ion-icon name="arrow-dropright" item-right></ion-icon>
+        </ion-item>
+  </ion-list>
+</ion-content>

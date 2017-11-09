@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>
+      rapport
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding id="page1">
+  <h4 id="rapport-heading1" style="color:#000000;">
+    Contenu de la cave
+  </h4>
+  <h6>
+      <ion-chip *ngFor="let bc of breadcrumb" (click)="goBack(bc.back)" color="light">
+      <ion-label>{{ bc.selected.key}}  ({{bc.selected.value}}) </ion-label>
+          <button ion-button clear>
+            <ion-icon name="arrow-dropright-circle"></ion-icon>
+          </button>
+        </ion-chip>
+  </h6>
+  <div *ngIf="typesGrouping && typesGrouping.length>0">
+      <ion-list>
+        <button ion-item *ngFor="let type of typesGrouping" (click)="selectType(type)">
+          {{ type.key }}<ion-badge item-end>{{ type.value }}</ion-badge>
+        </button>  
+      </ion-list>
+  </div>
+  <div *ngIf="typesOrigineGrouping && typesOrigineGrouping.length>0">
+      <ion-list>
+        <button ion-item *ngFor="let origine of typesOrigineGrouping" (click)="selectOrigine(breadcrumb[0].selected,origine)">
+          {{ origine.key }} <ion-badge item-end>{{ origine.value }}</ion-badge>
+        </button>  
+      </ion-list>
+  </div>
+  <div *ngIf="typesOrigineYearGrouping && typesOrigineYearGrouping.length>0">
+    <ion-list>
+      <button ion-item *ngFor="let year of typesOrigineYearGrouping" (click)="selectYear(breadcrumb[0].selected,breadcrumb[1].selected,year)">
+        {{ year.key }} <ion-badge item-end>{{ year.value }}</ion-badge>
+      </button>  
+    </ion-list>
+  </div>
+  <div *ngIf="vinsFiltered && vinsFiltered.length>0">
+      <ion-card *ngFor="let wine of vinsFiltered" (click)="selectWine(wine)">
+          <ion-card-header>
+            {{wine.nom}}
+          </ion-card-header>
+          <ion-card-content>
+            {{'wine.price' | translate }} : {{wine.prixAchat}} - {{'wine.location' | translate }} : {{wine.localisation}}<br>
+            {{'wine.bottlesLeft' | translate }} : <ion-badge item-end>{{ wine.nbreBouteillesReste}}</ion-badge>
+          </ion-card-content>
+      </ion-card>
+  </div>
+  <!--   <div class="wrap-collabsible">
+    <input id="collapsible" class="toggle" type="checkbox">
+    <label for="collapsible" class="lbl-toggle" tabindex="0">More Info level 1</label>
+    <div class="collapsible-content">
+      <div class="content-inner">
+      </div>
+    </div>
+  </div>
+ --></ion-content>

@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+<!--     <ion-buttons start>
+      <button ion-button icon-left>
+        <ion-icon name="menu"></ion-icon>
+        Menu
+      </button>
+    </ion-buttons>
+ -->    <ion-title>
+        {{ 'title' | translate }}
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding id="config">
+    <alert></alert>
+  <form id="configuration-form6">
+    <ion-item id="configuration-input14">
+      <ion-label>
+        {{'config.dbServerURL' | translate}}
+      </ion-label>
+      <ion-input [(ngModel)]="config.serverUrl" type="text" placeholder="URL Serveur DB" name="serverURL"></ion-input>
+    </ion-item>
+    <ion-item id="configuration-select5">
+      <ion-label>
+          {{'config.language' | translate }}
+      </ion-label>
+      <ion-select [(ngModel)]="config.language" (ionChange)="languageChange($event)" name="langue" interface="popover">
+          <ion-option *ngFor="let lang of supportedLanguages" [value]="lang.name">
+              {{lang.name | translate }}
+          </ion-option>
+      </ion-select>
+    </ion-item>
+    <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
+        {{'general.save' | translate }}
+    </button>
+<!--     <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
+        Sauvegarde
+    </button>
+ -->
+  </form>
+  <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+</ion-content>
