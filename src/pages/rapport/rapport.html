@@ -22,23 +22,32 @@
   </h6>
   <div *ngIf="typesGrouping && typesGrouping.length>0">
       <ion-list>
-        <button ion-item *ngFor="let type of typesGrouping" (click)="selectType(type)">
-          {{ type.key }}<ion-badge item-end>{{ type.value }}</ion-badge>
-        </button>  
+          <ion-item ion-item *ngFor="let type of typesGrouping" (click)="selectType(type)">
+              {{ type.key }}<ion-badge item-end>{{ type.value }}</ion-badge>
+              <button ion-button item-end clear icon-end >  
+                <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
+              </button>  
+            </ion-item>
       </ion-list>
   </div>
   <div *ngIf="typesOrigineGrouping && typesOrigineGrouping.length>0">
       <ion-list>
-        <button ion-item *ngFor="let origine of typesOrigineGrouping" (click)="selectOrigine(breadcrumb[0].selected,origine)">
-          {{ origine.key }} <ion-badge item-end>{{ origine.value }}</ion-badge>
-        </button>  
+          <ion-item ion-item *ngFor="let origine of typesOrigineGrouping" (click)="selectOrigine(breadcrumb[0].selected,origine)">
+              {{ origine.key }} <ion-badge item-end>{{ origine.value }}</ion-badge>
+              <button ion-button item-end clear icon-end >  
+                <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
+              </button>  
+          </ion-item>
       </ion-list>
   </div>
   <div *ngIf="typesOrigineYearGrouping && typesOrigineYearGrouping.length>0">
     <ion-list>
-      <button ion-item *ngFor="let year of typesOrigineYearGrouping" (click)="selectYear(breadcrumb[0].selected,breadcrumb[1].selected,year)">
-        {{ year.key }} <ion-badge item-end>{{ year.value }}</ion-badge>
-      </button>  
+        <ion-item ion-item *ngFor="let year of typesOrigineYearGrouping" (click)="selectYear(breadcrumb[0].selected,breadcrumb[1].selected,year)">
+            {{ year.key }} <ion-badge item-end>{{ year.value }}</ion-badge>
+            <button ion-button item-end clear icon-end >  
+              <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
+            </button>  
+        </ion-item>
     </ion-list>
   </div>
   <div *ngIf="vinsFiltered && vinsFiltered.length>0">

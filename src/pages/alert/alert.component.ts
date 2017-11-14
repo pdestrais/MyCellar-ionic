@@ -1,6 +1,7 @@
 import { TranslateService } from '@ngx-translate/core';
 import { NavController, AlertController } from 'ionic-angular';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 import { AlertService } from '../../services/alert.service';
 
@@ -11,24 +12,32 @@ import { AlertService } from '../../services/alert.service';
 
 export class AlertComponent {
     message: any;
+    subscription:Subscription;
 
-    constructor(private alertService: AlertService,public alertController:AlertController, private navCtrl : NavController, private translate:TranslateService) { }
+    constructor(private alertService: AlertService,
+                public alertController:AlertController, 
+                private navCtrl : NavController, 
+                private translate:TranslateService) {            
+    }
 
     ngOnInit() {
-        this.alertService.getMessage().subscribe(
+        console.log("[AlertComponent] - entering ngOnInit");
+
+        this.subscription = this.alertService.getMessage()
+        .subscribe(
             message => { 
-                console.log("alert component got message")
+                console.log("[AlertComponent]alert component got message :" +JSON.stringify(message));
                 this.message = message; 
                 if (message && message.presentation=="dialog" && (message.type=="success" || message.type=="error")) {
                     let alert = this.alertController.create({
                         title: this.translate.instant('general.confirm'),
                         message: message.text,
                         buttons: [
-                          {
+                        {
                             text: this.translate.instant('general.ok'),
                             handler: () => {
                                 if (message.nextPage && message.nextPage!=null)
-                                 this.navCtrl.setRoot(message.nextPage);
+                                this.navCtrl.setRoot(message.nextPage);
                             }                        }
                         ],
                         // cssClass: message.type=="success"?'alertDanger':'alertDanger'
@@ -36,10 +45,17 @@ export class AlertComponent {
                     });
                     alert.present();
                 }
-                else 
+                else if (message && message.type && message.type=="off") {
+                    this.unsubscribe();
                     if (message && message.nextPage && message.nextPage!=null)
                         this.navCtrl.setRoot(message.nextPage)
+                }
             }
-        )
+        );
     }
+
+    unsubscribe() {
+        this.subscription.unsubscribe();
+    }
+
 }

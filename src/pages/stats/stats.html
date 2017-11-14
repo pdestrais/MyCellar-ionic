@@ -9,26 +9,48 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page7">
-  <h4 id="stats-heading2" style="color:#000000;">
-    Consommation
+  <h4 id="stats-heading2" style="color:#000000;" translate>
+    stats.consumption
   </h4>
   <form id="stats-form5">
-    <ion-item id="stats-range1">
-      <ion-range min="1" max="10" step="1" color="positive" value="1" name="from">
-        <ion-label range-left>
-          à partir de
-        </ion-label>
-      </ion-range>
+    <ion-item id="stats-from">
+      <ion-label translate>stats.from</ion-label>
+      <ion-select [(ngModel)]="from" interface="popover" name="end">
+        <ion-option *ngFor="let option of fromOptions" [value]="option.value">
+            {{option.display | translate }}
+        </ion-option>
+      </ion-select>
     </ion-item>
-    <ion-item id="stats-range2">
-      <ion-range min="1" max="10" step="1" color="positive" value="1" name="to">
-        <ion-label range-left>
-          jusquà
-        </ion-label>
-      </ion-range>
+    <ion-item id="stats-to">
+      <ion-label translate>stats.to</ion-label>
+      <ion-select [(ngModel)]="to" interface="popover" name="start">
+        <ion-option *ngFor="let option of toOptions" [value]="option.value">
+            {{option.display | translate }}
+        </ion-option>
+      </ion-select>
     </ion-item>
   </form>
-  <button id="stats-button6" ion-button color="positive" block>
-    Afficher
+  <button id="stats-button6" ion-button color="positive" block (click)="draw()">
+    {{'general.show' | translate }}
   </button>
+  <div id="title"></div>
+  <div id="chart"></div>
+  <div *ngIf="ready" class="statTable">
+    <table border="0" cellpadding="10">
+        <thead>
+            <tr>
+                <th></th>
+                <th>region</th>
+                <th>#</th>
+            </tr>
+        </thead>
+        <tbody id="chartTableBody">
+            <tr *ngFor="let d of dataset">
+                <td class="tabcolor"></td>
+                <td>{{d.label}}</td>
+                <td>{{d.count}}</td>
+            </tr>
+        </tbody>
+      </table>
+  </div>
 </ion-content>

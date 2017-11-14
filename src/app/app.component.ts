@@ -55,15 +55,14 @@ export class MyApp {
   }
   goToAppellation(params){
     if (!params) params = {};
-    this.navCtrl.setRoot(AppellationPage);
+    this.navCtrl.setRoot(AppellationPage,{action:'list'}  );
   }
   goToSearch(params){
     if (!params) params = {};
     this.navCtrl.setRoot(SearchPage);
   }
-  goToRegion(params){
-    if (!params) params = {};
-    this.navCtrl.setRoot(RegionPage);
+  goToRegion(){
+    this.navCtrl.setRoot(RegionPage,{action:'list'});
   }
   goToRapport(params){
     if (!params) params = {};

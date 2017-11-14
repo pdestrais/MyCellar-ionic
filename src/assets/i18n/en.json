@@ -39,16 +39,30 @@
     "minmax":"must 4 digit length"
   },
   "appellation":{
+    "appellation":"appellation",
     "long":"long",
-    "short":"short"
+    "short":"short",
+    "appellationShort":"Short appellation name",
+    "appellationLong":"Long appellation name",
+    "appellationDeleted":"The appellation is deleted",
+    "appellationNotDeleted":"The appellation is not deleted"
   },
   "origin":{
     "region":"region",
-    "country":"country"
+    "country":"country",
+    "originCountry":"Origin country",
+    "originRegion":"Origin Region",
+    "originDeleted":"The appellation is deleted",
+    "originNotDeleted":"The appellation is not deleted"
   },
   "stats":{
     "from":"from",
-    "to":"to"
+    "to":"to",
+    "oneYear":"one year",
+    "twoYears":"two years",
+    "threeYears":"three years",
+    "consumption":"consumption",
+    "now":"now"
   },
   "search":{
     "inStock":"wine in stock",
@@ -58,7 +72,7 @@
     "save":"save",
     "confirm":"confirm",
     "suppress":"suppress",
-    "addComment":"add comment",
+    "add":"add",
     "error":"error",
     "name":"name",
     "view":"view",

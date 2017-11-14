@@ -322,6 +322,7 @@ export class PouchdbService {
       });
     }
   
+    // saveDoc will use a post command if the doc has no _id attribute, otherwize use the put to update the document
     public saveDoc(doc) {
       let _self = this;
       if (doc._id) {
