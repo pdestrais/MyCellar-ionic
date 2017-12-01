@@ -1,7 +1,6 @@
 import { TranslateService } from '@ngx-translate/core';
 import { AlertService } from './alert.service';
-import { ConfigurationPage } from './../pages/configuration/configuration';
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable } from '@angular/core';
 //import { NavController } from 'ionic-angular';
 import { SimpleCacheService } from './simpleCache.service';
 import PouchDB from 'pouchdb';
@@ -16,7 +15,6 @@ export class PouchdbService {
     private subject = new Subject<any>();
 
     private remoteServerUrl:string = '';
-    private locale:string = '';
     private dbUpToDate:boolean = false;
   
     public vinView:string = 'indexVin';
@@ -72,12 +70,12 @@ export class PouchdbService {
           _self.put('config', newConfig)
           .then(result => {
             console.info("new config saved");
-            _self.alertService.success(_self.translateService.instant('newConfigSaved'));
+            _self.alertService.success(_self.translateService.instant('general.newConfigSaved'));
             _self.syncDB();
           })
           .catch(err => {
             console.info("new config not saved");
-            _self.alertService.success(_self.translateService.instant('newConfigNotSaved'))
+            _self.alertService.success(_self.translateService.instant('general.newConfigNotSaved'))
           });
         })
         .on('error', function (err) {
@@ -90,21 +88,16 @@ export class PouchdbService {
 
     public init() {
       console.log("[PouchDBService init]called");
-      let _self = this;
       this.database = new PouchDB('cave');
       //this.database.setMaxListeners(20);
       this.database.info().then( info => {
         console.log('We have a database: ' + JSON.stringify(info));
         this.database.get('config').then(result => {
-          _self.remoteServerUrl = result.serverUrl;
-          _self.locale = result.locale;
-          //result.locale
-          //  ?this.i18n.setLocale(result.locale).then(() => console.log('Langue adaptée -> '+result.locale))
-          //  :this.i18n.setLocale("en-US").then(() => console.log('Langue par défaut -> '+"en-US"));
-         // _self.createdatabaseViews();
-          _self.DBlistener.next({change:undefined,message:'SyncStarts'});
-          console.info('Start syncing with: ' + _self.remoteServerUrl);
-          _self.syncDB();
+          this.remoteServerUrl = result.serverUrl;
+          this.DBlistener.next({change:undefined,message:'SyncStarts'});
+          this.subject.next({type: 'configLoaded', message: result});
+          console.info('Start syncing with: ' + this.remoteServerUrl);
+          this.syncDB();
         })
         .catch(err => this.subject.next({ type: 'error', message: 'DB not configured' }));
       });
@@ -114,7 +107,6 @@ export class PouchdbService {
       console.log("[PouchDBService syncDB]called")
       let _self = this;
       this.database.sync(this.remoteServerUrl, {
-  //		this.database.sync('cave', "https://pdestrais:id513375@pdestrais.cloudant.com/cave", {
         live: true,
         retry: true
         })
@@ -124,7 +116,7 @@ export class PouchdbService {
         _self.dbUpToDate = true;
           console.info('Database paused');
           console.info('databaseUpToDate Event emitted '+JSON.stringify(err));
-          _self.loadRefDataInCache();
+          //_self.loadRefDataInCache();
         _self.DBlistener.next({change:undefined,message:'dbUpToDate'});
       }).on('active', function () {
         console.info('Database active : ');
@@ -138,7 +130,7 @@ export class PouchdbService {
       });
     }
   
-    public loadOriginesRefList() {
+/*     public loadOriginesRefList() {
       return this.database.query('indexOrigine',{include_docs:true})
               .then(result => result.rows.map(doc => this.cache.set('origineList',doc.id, doc.value)))
     }
@@ -150,17 +142,14 @@ export class PouchdbService {
   
     public loadTypesRefList() {
       return this.database.query('indexType',{include_docs:true})
-            .then(result => result.rows.map(doc => {
-                this.cache.set('typeList',doc.id, doc.value);
-              }
-            ))
+            .then(result => result.rows.map(doc => this.cache.set('typeList',doc.id, doc.value)))
     }
   
     public loadRefDataInCache() {
       return Promise.all([this.loadOriginesRefList(),this.loadAppellationsRefList(),this.loadTypesRefList()]);
     }
   
-    private createDesignDoc(name, mapFunction, reduceFunction) {
+ */    private createDesignDoc(name, mapFunction, reduceFunction) {
       let ddoc = {
         _id: '_design/' + name,
         views: {
@@ -244,33 +233,6 @@ export class PouchdbService {
       .catch(err => console.info('reportVinView already exists: ' + JSON.stringify(err)));
     }
   
-/*     public nuke() {
-      return this.database.destroy();
-    }
- */  
-
- /*     public createSettings(config){
-      let _self = this;
-      return this.database.get(config.id).then(doc => {
-        // config doc exists, doc._rev is used to update)
-        console.info("existing config loaded");
-        return _self.database.put({
-          _id: 'config',
-          _rev: doc._rev,
-          serverUrl: config.serverUrl,
-          locale : config.locale
-        });
-      }).catch(function (err) {
-        // no config document exists
-        console.info("no existing config "+JSON.stringify(err));
-        return _self.database.put({
-          _id: 'config',
-          serverUrl: config.serverUrl,
-          locale : config.locale
-        });
-      });
-    }
- */  
     /*******************************************************************
   
               GENERIC
@@ -365,7 +327,27 @@ export class PouchdbService {
       return this.database.query(viewName,{include_docs:true})
       .then(result => {return result.rows}).catch(err => {console.error(err); return err;});
     }
-  
+
+    public getDocsOfType(type:string) {
+      return this.database.allDocs({include_docs: true,startkey: type+'|', endkey: type+'|\ufff0'})
+      .then( result => {
+        return result.rows.map(res => res.doc);
+      }).
+      catch((error) => {return error});
+      
+/*       return this.database.allDocs({include_docs: true}).then( result => {
+        return result.rows.filter( row => {
+          if( !row.doc._id.match(new RegExp("^"+type,"i")) ) {
+            return false;
+          } else {
+            return true;
+          }
+        })
+        .map(res => res.doc);
+      }).
+      catch((error) => {return error});
+ */    }
+
     /*******************************************************************
   
               VINS
@@ -380,7 +362,8 @@ export class PouchdbService {
             return true;
           }
         });
-      });
+      }).
+      catch((error) => {return error});
     }
   
     public saveVin (vin) {

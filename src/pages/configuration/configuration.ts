@@ -1,6 +1,6 @@
 import { AlertService } from './../../services/alert.service';
-import { Component } from '@angular/core';
-import { NavController, AlertController, Platform } from 'ionic-angular';
+import { Component, NgZone } from '@angular/core';
+import { NavController, AlertController } from 'ionic-angular';
 import { PouchdbService } from './../../services/pouchdb.service';
 import {TranslateService} from '@ngx-translate/core';
 import { SearchPage } from '../search/search';
@@ -13,7 +13,6 @@ export class ConfigurationPage {
 
   public gender = 'f';
   public config:any = {};
-  private locale:string = '';
   public supportedLanguages:Array<any> = [{name:'french',locale:'fr-FR'},{name:'english', locale:'en-US'}];
   public loading:boolean = false;
 
@@ -21,7 +20,8 @@ export class ConfigurationPage {
               public alertCtrl: AlertController, 
               public pouchDB:PouchdbService, 
               public translate: TranslateService,
-              public alertService:AlertService) {
+              public alertService:AlertService,
+              public zone:NgZone) {
 //    this.config = {id:'config', serverUrl : 'http://localhost:5984/copy_cave_prod', language:'english' };
   }
   
@@ -35,7 +35,8 @@ export class ConfigurationPage {
       else {
         console.log('[configuration - ionViewDidLoad]response received');
         this.config = response;
-        this.translate.use(this.convertLanguageToLocale(this.config.language));
+        if (this.config.language)
+          this.translate.use(this.config.language);
       }
     }).catch(err => {
       console.log("error getting config in activate");
@@ -68,19 +69,10 @@ export class ConfigurationPage {
   }
 
   languageChange(val: any) {
-    this.config.locale = this.convertLanguageToLocale(val);
+    this.config.language = val;
     console.log('Language Change:', val);
+    this.zone.run(() => this.translate.use(this.config.language));
     this.pouchDB.saveDoc(this.config);
-  }
-
-  private convertLanguageToLocale(language:string) {
-    let locale:string = '';
-    switch (language) {
-      case "english" : return('en-US');
-      case 'french' : return('fr-FR');
-      default : return('en-US');
-    }
-
   }
 
   showSuccess() {

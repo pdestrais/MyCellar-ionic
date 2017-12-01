@@ -4,7 +4,7 @@ export class VinModel {
                 public annee:string,
                 public nbreBouteillesAchat:number,
                 public nbreBouteillesReste:number,
-                public prixAchat:string,
+                public prixAchat:number,
                 public dateAchat:string,
                 public remarque:string,
                 public localisation:string,

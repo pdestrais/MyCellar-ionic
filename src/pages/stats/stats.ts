@@ -71,13 +71,13 @@ export class StatsPage {
                 // if dataset already contains the region, add the difference to dataset's count. If not, create dataset element with label and count
                 var _self2 = _self1;
                 _self.dataset.forEach(function(d,id) {
-                    if (d.label == item.origine.region) {
+                    if (d.label == item.origine.region && h.difference < 0) {
                         d.count = d.count - h.difference;
                         _self2.total = _self2.total - h.difference
                         into = true;
                     }
                 });
-                if (!into) {
+                if (!into && h.difference < 0) {
                     _self.dataset.push({label:item.origine.region,count:-h.difference});
                     _self2.total = _self2.total - h.difference;
                 }
@@ -107,8 +107,8 @@ export class StatsPage {
     var height = this.height;
     var radius = Math.min(width, height) / 2;
     var donutWidth = 100;                            // NEW
-    var legendRectSize = 15;                                  // NEW
-    var legendSpacing = 2;                                    // NEW
+    //var legendRectSize = 15;                                  // NEW
+    //var legendSpacing = 2;                                    // NEW
     var color = d3scale.scaleOrdinal(d3scale.schemeCategory20);
 
     //cleaning up before drawing
@@ -201,7 +201,7 @@ export class StatsPage {
       let temp6 = temp5.select('td');
  */
       console.log("adapt table style");
-      var tds = d3select.selectAll('.tabcolor')
+      d3select.selectAll('.tabcolor')
       .data(this.dataset)
       .style('background-color', function(d, i) {
         return color(d.label);

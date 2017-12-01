@@ -1,10 +1,10 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="primary">
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>
-      vin
+      {{'page.wine' | translate }}
     </ion-title>
   </ion-navbar>
 </ion-header>
@@ -74,8 +74,9 @@
       <ion-label>
         {{'wine.bottlesPurchase' | translate }}
       </ion-label>
-      <ion-input [(ngModel)]="vin.nbreBouteillesAchat" type="text" placeholder="Nbre bouteilles achat" formControlName="nbreBouteillesAchat" text-right
-      [class.invalid]="!vinForm.controls.nbreBouteillesAchat.valid && (vinForm.controls.nbreBouteillesAchat.dirty || submitted)"></ion-input>
+      <ion-input [(ngModel)]="vin.nbreBouteillesAchat" type="number" placeholder="Nbre bouteilles achat" formControlName="nbreBouteillesAchat" text-right
+      [class.invalid]="!vinForm.controls.nbreBouteillesAchat.valid && (vinForm.controls.nbreBouteillesAchat.dirty || submitted)" 
+      (blur)="toNumber('nbreBouteillesAchat')"></ion-input>
     </ion-item>
     <ion-item *ngIf="!vinForm.controls.nbreBouteillesAchat.valid  && (vinForm.controls.nbreBouteillesAchat.dirty || submitted)">
       <p class="invalid">{{'wine.bottlesPurchase' | translate }} {{"general.required" | translate }}</p>
@@ -84,8 +85,9 @@
       <ion-label>
         {{'wine.bottlesLeft' | translate }}
       </ion-label>
-      <ion-input [(ngModel)]="vin.nbreBouteillesReste" type="text" placeholder="Nbre bouteilles restantes" formControlName="nbreBouteillesReste" text-right
-      [class.invalid]="!vinForm.controls.nbreBouteillesReste.valid && (vinForm.controls.nbreBouteillesReste.dirty || submitted)"></ion-input>
+      <ion-input [(ngModel)]="vin.nbreBouteillesReste" type="number" placeholder="Nbre bouteilles restantes" formControlName="nbreBouteillesReste" text-right
+      [class.invalid]="!vinForm.controls.nbreBouteillesReste.valid && (vinForm.controls.nbreBouteillesReste.dirty || submitted)" 
+      (blur)="toNumber('nbreBouteillesReste')"></ion-input>
     </ion-item>
     <ion-item *ngIf="!vinForm.controls.nbreBouteillesReste.valid  && (vinForm.controls.nbreBouteillesReste.dirty || submitted)">
       <p class="invalid">{{'wine.bottlesLeft' | translate }} {{"general.required" | translate }}</p>
@@ -95,7 +97,8 @@
         {{'wine.price' | translate }}
       </ion-label>
       <ion-input [(ngModel)]="vin.prixAchat" type="number" placeholder="Prix" formControlName="prixAchat" text-right
-      [class.invalid]="!vinForm.controls.prixAchat.valid && (vinForm.controls.prixAchat.dirty || submitted)"></ion-input>
+      [class.invalid]="!vinForm.controls.prixAchat.valid && (vinForm.controls.prixAchat.dirty || submitted)" 
+      (blur)="toNumber('prixAchat')"></ion-input>
     </ion-item>
     <ion-item *ngIf="!vinForm.controls.prixAchat.valid  && (vinForm.controls.prixAchat.dirty || submitted)">
       <p class="invalid">{{'wine.price' | translate }} {{"general.required" | translate }} {{'general.or' | translate }} {{'wine.priceFormatInvalid' | translate }}</p>
@@ -133,7 +136,7 @@
           <ion-icon name="arrow-dropright"></ion-icon>
           Show
         </button>
-    </ion-item>    
+    </ion-item> 
     <button id="vin-button1" ion-button color="primary" block (click)="saveVin()">
       {{'general.save' | translate }}
     </button>

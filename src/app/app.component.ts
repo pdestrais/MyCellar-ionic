@@ -1,4 +1,4 @@
-import { Component, ViewChild, EventEmitter } from '@angular/core';
+import { Component, ViewChild, NgZone } from '@angular/core';
 import { Platform, Nav } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -21,34 +21,53 @@ import { PouchdbService } from '../services/pouchdb.service';
 export class MyApp {
   @ViewChild(Nav) navCtrl: Nav;
     //rootPage:any = SearchPage;
-    rootPage:any = SearchPage;
+    //rootPage:any = SearchPage;
     private message:any;
 
   constructor(platform: Platform, 
               statusBar: StatusBar, 
               splashScreen: SplashScreen, 
               public pouchDB:PouchdbService, 
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private zone:NgZone) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
+      this.message = this.pouchDB.getMessage();
+      this.message.subscribe(event => {
+        console.log('[App]Event : '+JSON.stringify(event.message));
+        this.navCtrl.setRoot(SearchPage);
+        // if no config element could be found during PouchDB initialization 
+        if (event.type == 'error') {
+          // We set the language to 'english' as default and navigate to configuration page.
+          this.translate.use('english');
+          this.navCtrl.push(ConfigurationPage);          
+        } else if (event.type == 'configLoaded') { // config has been loaded from the PouchDB
+          if (event.message.language) { // language is found and will be set
+            this.zone.run(() => { 
+              this.translate.use(event.message.language).subscribe(() => console.log('[App]Setting language to : '+event.message.language)); 
+              //this.translate.setDefaultLang(event.message.language); 
+            })
+          }
+          else {// use default language (english)
+            console.log('[App]Setting language to default English');
+            this.translate.use('english');  
+          } 
+        }
+      });
       this.pouchDB.init();
       //this.navCtrl.setRoot(SearchPage);
       // check if no configuration
-      this.message = pouchDB.getMessage();
-      this.message.subscribe(message => {
-        console.log('Event : '+message.message);
-        this.navCtrl.push(ConfigurationPage);
-      });
       //this.navCtrl.setRoot(SearchPage);
       // this language will be used as a fallback when a translation isn't found in the current language
-      translate.setDefaultLang('en');
+//      translate.setDefaultLang('en');
       // the lang to use, if the lang isn't available, it will use the current loader to get them
-      translate.use('en');
+//      translate.use('en');
     });
   }
+
   goToVin(params){
     if (!params) params = {};
     this.navCtrl.setRoot(VinPage);

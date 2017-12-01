@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar color="primary">
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
@@ -10,7 +10,7 @@
       </button>
     </ion-buttons>
  -->    <ion-title>
-        {{ 'title' | translate }}
+          {{'page.config' | translate }}
     </ion-title>
   </ion-navbar>
 </ion-header>
@@ -18,13 +18,13 @@
     <alert></alert>
   <form id="configuration-form6">
     <ion-item id="configuration-input14">
-      <ion-label>
+      <ion-label floating>
         {{'config.dbServerURL' | translate}}
       </ion-label>
       <ion-input [(ngModel)]="config.serverUrl" type="text" placeholder="URL Serveur DB" name="serverURL"></ion-input>
     </ion-item>
     <ion-item id="configuration-select5">
-      <ion-label>
+      <ion-label floating>
           {{'config.language' | translate }}
       </ion-label>
       <ion-select [(ngModel)]="config.language" (ionChange)="languageChange($event)" name="langue" interface="popover">

@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
 import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
-import { VinModel, AppellationModel,TypeModel } from '../../models/cellar.model'
+import { AppellationModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
 
 @Component({
@@ -76,7 +76,7 @@ export class AppellationPage {
         .then(response => {
                 if (response.ok) { 
                     console.debug("[Appellation - saveAppellation]Appellation "+ JSON.stringify(this.appellation)+"saved");
-                    this.pouch.loadAppellationsRefList();
+                    //this.pouch.loadAppellationsRefList();
                     this.alertService.success(this.translate.instant('general.dataSaved'),SearchPage,"");
                     //this.navCtrl.push(SearchPage)
                 } else {
@@ -90,7 +90,6 @@ export class AppellationPage {
 }
 
  public deleteAppellation() {
-  let _self = this;
   let alert = this.alertController.create({
       title: this.translate.instant('general.confirm'),
       message: this.translate.instant('general.sure'),
@@ -105,9 +104,9 @@ export class AppellationPage {
         {
           text: this.translate.instant('general.ok'),
           handler: () => {
-              let result = this.pouch.deleteDoc(this.appellation).then(response => {
+              this.pouch.deleteDoc(this.appellation).then(response => {
                   if (response.ok) {
-                      this.pouch.loadAppellationsRefList();                    
+                      //this.pouch.loadAppellationsRefList();                    
                       this.alertService.success(this.translate.instant('appellation.appellationDeleted'),SearchPage,'');
                     } else {
                       this.alertService.error(this.translate.instant('appellation.appellationNotDeleted'),undefined,'');                        

@@ -30,7 +30,7 @@ export class SearchPage {
   }
 
   ionViewDidLoad() {
-    console.debug("in ionViewDidLoad");
+    console.debug("[SearchPage]in ionViewDidLoad");
 /*     this.pouchDB.getListener().subscribe((change) => {
       if (change.message == 'SyncStarts') {
         this.loading = true;
@@ -43,7 +43,7 @@ export class SearchPage {
  */}
 
   ionViewWillEnter() {
-    console.debug("in ionViewWillEnter");
+    console.debug("[SearchPage]in ionViewWillEnter");
     this.loading = true;
     this.loadVins()
     this.searchControl.valueChanges.debounceTime(500).subscribe(search => { 
@@ -60,7 +60,11 @@ export class SearchPage {
       this.pouchDB.getVins().then(vins => {
         this.vins = vins.map(v => v.doc);
         this.loading = false; 
-        console.log("[Search]Vin loaded - # vins"+this.vins?this.vins.length:"undefined");
+        console.log("[SearchPage - loadVins]Vin loaded - # vins"+this.vins?this.vins.length:"undefined");
+      })
+      .catch(error => {
+        console.log("[SearchPage - loadVins]problem to load vins");
+        //this.loading = false;
       });        
   }
 

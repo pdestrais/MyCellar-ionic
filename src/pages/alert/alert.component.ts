@@ -1,6 +1,6 @@
 import { TranslateService } from '@ngx-translate/core';
 import { NavController, AlertController } from 'ionic-angular';
-import { Component, OnInit, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { AlertService } from '../../services/alert.service';
@@ -53,6 +53,11 @@ export class AlertComponent {
             }
         );
     }
+
+    ngOnDestroy(){
+        console.log("[AlertComponent] - entering ngOnDestroy");
+        this.subscription.unsubscribe();
+      }
 
     unsubscribe() {
         this.subscription.unsubscribe();

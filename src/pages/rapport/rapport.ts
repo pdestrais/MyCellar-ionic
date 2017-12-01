@@ -18,8 +18,6 @@ export class RapportPage {
   private typesOrigineGrouping:Array<any> =[];
   private typesOrigineYearGrouping:Array<any> =[];
   private breadcrumb:Array<any>=[];
-  private selectedType:any;
-  private selectedOrigine:any;
   
   constructor(public navCtrl: NavController,public navParams: NavParams, public pouch:PouchdbService) {
   }
@@ -40,7 +38,8 @@ export class RapportPage {
                                                   v.doc.annee == ddStruct.year.key ); 
                                             })
                                       .map(v => v.doc);
-              console.debug("[Rapport - ionViewDidLoad]# vins loaded with type/region/annee: "+this.vinsFiltered.length+" - "+ddStruct.type.key+"/"+ddStruct.origine.key+"/"+ddStruct.year.key);
+              
+                      console.debug("[Rapport - ionViewDidLoad]# vins loaded with type/region/annee: "+this.vinsFiltered.length+" - "+ddStruct.type.key+"/"+ddStruct.origine.key+"/"+ddStruct.year.key);
       });      
     } else if (ddStruct && ddStruct.type && ddStruct.origine) {
       //let viewStack:any = this.navCtrl._views;
@@ -59,7 +58,13 @@ export class RapportPage {
                                                               d.origine.pays+' - '+d.origine.region == ddStruct.origine.key) 
                                                     }));
               console.log("[Rapport - ionViewDidLoad]typesOrigineYearGrouping : "+JSON.stringify(this.typesOrigineYearGrouping));
-      });      
+              this.typesOrigineYearGrouping.sort(function (a, b) {
+                if (a.key < b.key) { return -1; }
+                if (a.key > b.key) { return 1; }
+                // names must be equal
+                return 0;
+            })
+});      
     } else if (ddStruct && ddStruct.type) {
       //let viewStack:any = this.navCtrl._views;
       this.breadcrumb[0] =  {text:ddStruct.type.key,number:ddStruct.type.value,selected:ddStruct.type,back:1};
@@ -70,7 +75,7 @@ export class RapportPage {
             this.typesOrigineGrouping = d3.nest()
               .key(function(d:any) { return d.origine.pays+' - '+d.origine.region; })
               .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
-              .entries(this.vins.filter(function(d) { return (d.nbreBouteillesReste !=0 && 
+              .entries(this.vins.filter(function(d) { return (+d.nbreBouteillesReste !=0 && 
                                                               d.type.nom == ddStruct.type.key) 
                                                     }));
               console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesOrigineGrouping));
@@ -82,7 +87,7 @@ export class RapportPage {
               this.typesGrouping = d3.nest()
               .key(function(d:any) { return d.type.nom; })
               .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
-              .entries(this.vins.filter(function(d) { return (d.nbreBouteillesReste !=0) }));
+              .entries(this.vins.filter(function(d:any) { return (d.nbreBouteillesReste != 0 || d.nbreBouteillesReste != "0") }));
               console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesGrouping));
       });
     } 

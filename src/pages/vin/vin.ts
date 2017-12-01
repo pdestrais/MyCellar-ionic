@@ -18,9 +18,9 @@ export class VinPage {
   public nbreAvantUpdate:number = 0;
   public newWine:boolean = true;
   public vin:VinModel;
-  public origines:any;
-  public appellations:any;
-  public types:any;
+  public origines:Array<any>=[];
+  public appellations:Array<any>=[];
+  public types:Array<any>=[];
   public comment:string = '';
   public errors:Array<any>;   
   public vinForm:FormGroup;
@@ -37,22 +37,29 @@ export class VinPage {
               public modalCtrl: ModalController) {
     console.log('[VinPage constructor]params is :'+JSON.stringify(navParams));
     this.paramId = navParams.get('id');
-    this.origines = Array.from(cache.getListValues("origineList"));
-//    console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
-    this.appellations = Array.from(cache.getListValues("appellationList"));
-//    console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
-    this.types = Array.from(cache.getListValues("typeList"));    
-    console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
-    this.vin = new VinModel('','','',0,0,'','','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));
+    this.pouch.getDocsOfType('origine')
+    .then(result => {   this.origines = result;
+                        //console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
+                    });
+    this.pouch.getDocsOfType('appellation')
+    .then(result => {   this.appellations = result;
+                        //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
+                    });
+        
+    this.pouch.getDocsOfType('type')
+    .then(result => {   this.types = result;
+                        //console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
+                    });  
+    this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));
     this.vinForm = formBuilder.group({
         nom: ['',Validators.required],
         annee: ['',Validators.compose([Validators.minLength(4),Validators.maxLength(4), Validators.pattern('[0-9]*'), Validators.required])],
         type: ['',Validators.required],
         origine: ['',Validators.required],
         appellation: ['',Validators.required],
-        nbreBouteillesAchat: ['',Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
-        nbreBouteillesReste: ['',Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
-        prixAchat: ['',Validators.compose([Validators.pattern('[0-9]*(?:[.,])[0-9]*'), Validators.required])],
+        nbreBouteillesAchat: [0,Validators.required],
+        nbreBouteillesReste: [0,Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
+        prixAchat: [0,Validators.compose([Validators.pattern('[0-9]*(?:[.,])[0-9]*'), Validators.required])],
         dateAchat: ['',Validators.required],
         localisation: ['',Validators.required]      
     });
@@ -72,7 +79,7 @@ export class VinPage {
             console.log("[Vin - ionViewDidLoad]Vin loaded : "+JSON.stringify(this.vin));
         });
     } else
-        this.vin = new VinModel('','','',0,0,'','','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));
+        this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));    
   }
 
   public saveVin() {
@@ -109,7 +116,6 @@ export class VinPage {
 }
 
 public deleteVin() {
-    let _self = this;
     let alert = this.alertController.create({
         title: this.translate.instant('general.confirm'),
         message: this.translate.instant('general.sure'),
@@ -124,7 +130,7 @@ public deleteVin() {
           {
             text: this.translate.instant('general.ok'),
             handler: () => {
-                let result = this.pouch.deleteDoc(this.vin).then(response => {
+                this.pouch.deleteDoc(this.vin).then(response => {
                     if (response.ok) {
                         this.alertService.success(this.translate.instant('wine.wineDeleted'),SearchPage,'dialog');
 /*                         this.pouch.getCollection(this.pouch.vinView)
@@ -182,24 +188,25 @@ public deleteVin() {
     }
 
     public typeChange(val: any) {
-        this.pouch.newGetDoc(val).then(result => console.log(JSON.stringify(result)));
-        let tmp:any = this.cache.get("typeList",val);
-        this.vin.type = new TypeModel(tmp._id,tmp.nom);
+        this.pouch.newGetDoc(val).then(result => this.vin.type = new TypeModel(result._id,result.nom));
     }
 
     public origineChange(val: any) {
-        let tmp:any = this.cache.get("origineList",val);
-        this.vin.origine = new OrigineModel(tmp._id,tmp.pays,tmp.region);
+        this.pouch.newGetDoc(val).then(result => this.vin.origine = new OrigineModel(result._id,result.pays,result.region));
     }
 
     public appellationChange(val: any) {
-        let tmp:any = this.cache.get("appellationList",val);
-        this.vin.appellation = new AppellationModel(tmp._id,tmp.courte,tmp.longue);
+        this.pouch.newGetDoc(val).then(result => this.vin.appellation = new AppellationModel(result._id,result.courte,result.longue));
     }
 
     public showDate(ISODateString) {
         return ISODateString.substring(0,10)
     } 
+
+    public toNumber(attribute:string){
+        this.vin[attribute] = +this.vin[attribute];
+        console.log(attribute+' changed: '+this.vin[attribute]);
+      }
 }
 
 @Component({

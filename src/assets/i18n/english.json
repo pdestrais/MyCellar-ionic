@@ -1,14 +1,14 @@
 {
   "title" : "MyCellar",
   "page" : {
-    "config":"configuration",
-    "vin":"wine",
-    "appellation":"appellation",
-    "origin":"origin",
-    "type":"type",
-    "report":"report",
-    "stats":"statistics",
-    "search":"search"
+    "config":"Configuration",
+    "wine":"Wine",
+    "appellation":"Appellation",
+    "origin":"Origin",
+    "type":"Type",
+    "report":"Report",
+    "stats":"Statistics",
+    "search":"Search"
   },
   "config":{
     "dbServerURL": "DB server URL",
@@ -52,8 +52,8 @@
     "country":"country",
     "originCountry":"Origin country",
     "originRegion":"Origin Region",
-    "originDeleted":"The appellation is deleted",
-    "originNotDeleted":"The appellation is not deleted"
+    "originDeleted":"The origin is deleted",
+    "originNotDeleted":"The origin is not deleted"
   },
   "stats":{
     "from":"from",

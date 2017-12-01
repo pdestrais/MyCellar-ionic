@@ -1,0 +1,96 @@
+{
+  "title" : "MyCellar",
+  "page" : {
+    "config":"configuration",
+    "wine":"vin",
+    "appellation":"appellation",
+    "origin":"origine",
+    "type":"type",
+    "report":"rapport",
+    "stats":"statistiques",
+    "search":"Recherche"
+  },
+  "config":{
+    "dbServerURL": "URL server DB distant",
+    "language" : "langage"
+  },
+  "wine":{
+    "name":"nom",
+    "year":"année",
+    "type":"type",
+    "origin":"origine",
+    "appellation":"appellation",
+    "purchaseDate":"date d'achat",
+    "bottlesPurchase":"# bouteilles achetées",
+    "bottlesLeft":"# bouteilles restantes",
+    "comment":"commentaire",
+    "history":"historique",
+    "location":"localisation",
+    "price":"prix",
+    "contains":"contenant",
+    "wineDeleted":"Le vin est effacé",
+    "wineNotDeleted":"Le vin n'est pas effacé",
+    "addComment":"Ajout commentaire",
+    "priceFormatInvalid":"Le format est invalide (ex : 15.0)",
+    "addedOn":"Ajouté le ",
+    "addedExtractedOn":"Vin ajouté ou sorti le ",
+    "difference":"différence",
+    "or":"ou",
+    "minmax":"doit avoir au moins 4 chiffres"
+  },
+  "appellation":{
+    "appellation":"appellation",
+    "long":"long",
+    "short":"courte",
+    "appellationShort":"Nom appellation court",
+    "appellationLong":"Nom appellation long",
+    "appellationDeleted":"L'appellation est effacée",
+    "appellationNotDeleted":"L'appellation n'est pas effacée"
+  },
+  "origin":{
+    "region":"région",
+    "country":"pays",
+    "originCountry":"Pays d'origine",
+    "originRegion":"Région d'origine",
+    "originDeleted":"L'origine est effacée",
+    "originNotDeleted":"L'origine n'est pas effacée"
+  },
+  "stats":{
+    "from":"à partir de ",
+    "to":"jusqu'à",
+    "oneYear":"une année",
+    "twoYears":"Deux ans",
+    "threeYears":"Trois ans",
+    "consumption":"Consommation",
+    "now":"maintenant"
+  },
+  "search":{
+    "inStock":"vin en stock",
+    "outOfStock":"vin plus en stock"
+  },
+  "general":{
+    "save":"sauver",
+    "confirm":"confirmer",
+    "suppress":"supprimer",
+    "add":"ajouter",
+    "error":"erreur",
+    "name":"nom",
+    "view":"visualiser",
+    "show":"montrer",
+    "expand":"Etendre",
+    "search":"Rechercher",
+    "newConfigSaved":"La nouvelle configuration est sauvegardée",
+    "newConfigNotSaved":"Erreur lors de la sauvegarde de la nouvelle configuration, veuillez réessayer",
+    "DBError":"Il y a un problème de base de donnée, prenez contact avec la dévelopeur",
+    "invalidData":"Données non correctes, veuillez les corriger",
+    "dataSaved":"Vos données sont sauvegardées",
+    "sure":"Etes-vous sûr ?",
+    "cancel":"Annuler",
+    "ok":"ok",
+    "required":"Est requis"
+  },
+  "english":"Anglais",
+  "french":"Français",
+  "red":"Rouge",
+  "white":"Blanc"
+}

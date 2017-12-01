@@ -1,7 +1,7 @@
 <ion-split-pane>
     <ion-menu [content]="mainContent">
         <ion-header>
-          <ion-toolbar>
+          <ion-toolbar color="dark">
             <ion-title>
               Menu
             </ion-title>
@@ -9,32 +9,40 @@
         </ion-header>
         <ion-content id="side-menu21">
           <ion-list id="menu-list1">
-            <ion-item color="none" menuClose="" on-click="goToSearch()" id="menu-list-item1">
-              Recherche
+            <ion-item color="light" menuClose="" on-click="goToSearch()" id="menu-list-item1">
+                <ion-icon item-start><img src="./assets/imgs/search.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.search' | translate }}
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToVin()" id="menu-list-item2">
-              Vin
+            <ion-item color="light" menuClose="" on-click="goToVin()" id="menu-list-item2">
+                <ion-icon item-start><img src="./assets/imgs/vin_verre.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.wine' | translate }}
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToRegion()" id="menu-list-item20">
-              Region
+            <ion-item color="light" menuClose="" on-click="goToRegion()" id="menu-list-item20">
+                <ion-icon item-start><img src="./assets/imgs/region.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.origin' | translate }}
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToAppellation()" id="menu-list-item3">
-              Appellation
+            <ion-item color="light" menuClose="" on-click="goToAppellation()" id="menu-list-item3">
+                <ion-icon item-start><img src="./assets/imgs/appellation.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.appellation' | translate }}
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToRapport()" id="menu-list-item21">
-              Rapport
+            <ion-item color="light" menuClose="" on-click="goToRapport()" id="menu-list-item21">
+                <ion-icon item-start><img src="./assets/imgs/rapport.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.report' | translate }}
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToRapportPDF()" id="menu-list-item22">
-              Rapport PDF
+            <ion-item color="light" menuClose="" on-click="goToRapportPDF()" id="menu-list-item22">
+                <ion-icon item-start><img src="./assets/imgs/rapportpdf.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.report' | translate }} PDF
             </ion-item>
-            <ion-item color="none" menuClose="" on-click="goToStats()" id="menu-list-item26">
-              Stats
+            <ion-item color="light" menuClose="" on-click="goToStats()" id="menu-list-item26">
+                <ion-icon item-start><img src="./assets/imgs/statistics.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.stats' | translate }}
             </ion-item>
           </ion-list>
-          <div class="spacer" style="height:20px;" id="menu-spacer1"></div>
+          <div class="spacer" style="height:20px;" id="menu-spacer1" color="light"></div>
           <ion-list id="menu-list6">
-            <ion-item color="none" menuClose="" on-click="goToConfiguration()" id="menu-list-item27">
-              Configuration
+            <ion-item color="light" menuClose="" on-click="goToConfiguration()" id="menu-list-item27">
+                <ion-icon item-start><img src="./assets/imgs/settings.png" style="width: 24px; height: 24px;"></ion-icon>              
+                {{'page.config' | translate }}
             </ion-item>
           </ion-list>
         </ion-content>

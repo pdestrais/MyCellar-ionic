@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
 import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
-import { VinModel, AppellationModel, OrigineModel,TypeModel } from '../../models/cellar.model'
+import { OrigineModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
 import { Subject } from 'rxjs';
 
@@ -78,7 +78,7 @@ export class RegionPage {
         .then(response => {
                 if (response.ok) { 
                     console.debug("[Origine - saveOrigine]Origine "+ JSON.stringify(this.origine)+"saved");
-                    this.pouch.loadOriginesRefList();
+                    //this.pouch.loadOriginesRefList();
                     this.alertService.success(this.translate.instant('general.dataSaved'),SearchPage,"");
                     //this.navCtrl.push(SearchPage)
                 } else {
@@ -92,7 +92,6 @@ export class RegionPage {
 }
 
  public deleteOrigine() {
-  let _self = this;
   let alert = this.alertController.create({
       title: this.translate.instant('general.confirm'),
       message: this.translate.instant('general.sure'),
@@ -107,9 +106,9 @@ export class RegionPage {
         {
           text: this.translate.instant('general.ok'),
           handler: () => {
-              let result = this.pouch.deleteDoc(this.origine).then(response => {
+              this.pouch.deleteDoc(this.origine).then(response => {
                   if (response.ok) {
-                      this.pouch.loadOriginesRefList();                    
+                      //this.pouch.loadOriginesRefList();                    
                       this.alertService.success(this.translate.instant('origin.originDeleted'),SearchPage,'');
                     } else {
                       this.alertService.error(this.translate.instant('origin.originNotDeleted'),undefined,'');                        
