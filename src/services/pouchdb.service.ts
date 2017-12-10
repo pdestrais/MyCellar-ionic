@@ -69,7 +69,7 @@ export class PouchdbService {
           // store new config in local db
           _self.put('config', newConfig)
           .then(result => {
-            console.info("new config saved");
+            console.info("new config saved - pointing to : "+newConfig.serverUrl);
             _self.alertService.success(_self.translateService.instant('general.newConfigSaved'));
             _self.syncDB();
           })
@@ -93,10 +93,10 @@ export class PouchdbService {
       this.database.info().then( info => {
         console.log('We have a database: ' + JSON.stringify(info));
         this.database.get('config').then(result => {
-          this.remoteServerUrl = result.serverUrl;
+          let remoteServerUrl = result.serverUrl;
           this.DBlistener.next({change:undefined,message:'SyncStarts'});
           this.subject.next({type: 'configLoaded', message: result});
-          console.info('Start syncing with: ' + this.remoteServerUrl);
+          console.info('Start syncing with: ' + remoteServerUrl);
           this.syncDB();
         })
         .catch(err => this.subject.next({ type: 'error', message: 'DB not configured' }));
@@ -104,30 +104,36 @@ export class PouchdbService {
     }
   
     public syncDB() {
-      console.log("[PouchDBService syncDB]called")
-      let _self = this;
-      this.database.sync(this.remoteServerUrl, {
-        live: true,
-        retry: true
-        })
-      .on('change', function (info) {
-        console.info('Database changed : ' + JSON.stringify(info));
-      }).on('paused', function (err) {
-        _self.dbUpToDate = true;
-          console.info('Database paused');
-          console.info('databaseUpToDate Event emitted '+JSON.stringify(err));
-          //_self.loadRefDataInCache();
-        _self.DBlistener.next({change:undefined,message:'dbUpToDate'});
-      }).on('active', function () {
-        console.info('Database active : ');
-      }).on('denied', function (err) {
-        console.info('Database access denied : ' + JSON.stringify(err));
-      }).on('complete', function (info) {
-        console.info('Database access completed : ' + JSON.stringify(info));
-        _self.DBlistener.next({change:undefined,message:'SyncEnds'});
-      }).on('error', function (err) {
-        console.error('Database error : ' + JSON.stringify(err));
-      });
+      console.log("[PouchDBService syncDB]called");
+      let _self = this; 
+      this.database.get('config').then(result => {
+        console.log("[PouchDBService syncDB]syncing with : "+result.serverUrl);       
+        this.database.sync(result.serverUrl, {
+          live: true,
+          retry: true
+          })
+        .on('change', function (info) {
+          console.info('Database changed : ' + JSON.stringify(info));
+        }).on('paused', function (err) {
+          _self.dbUpToDate = true;
+            console.info('Database paused');
+            console.info('databaseUpToDate Event emitted '+JSON.stringify(err));
+            //_self.loadRefDataInCache();
+          _self.DBlistener.next({change:undefined,message:'dbUpToDate'});
+        }).on('active', function () {
+          console.info('Database active : ');
+        }).on('denied', function (err) {
+          console.info('Database access denied : ' + JSON.stringify(err));
+        }).on('complete', function (info) {
+          console.info('Database access completed : ' + JSON.stringify(info));
+          _self.DBlistener.next({change:undefined,message:'SyncEnds'});
+        }).on('error', function (err) {
+          console.error('Database error : ' + JSON.stringify(err));
+        });
+  
+
+      })
+      .catch(err => this.subject.next({ type: 'error', message: 'DB not configured' }));
     }
   
 /*     public loadOriginesRefList() {
@@ -285,7 +291,10 @@ export class PouchdbService {
     }
   
     // saveDoc will use a post command if the doc has no _id attribute, otherwize use the put to update the document
-    public saveDoc(doc) {
+    // if a docClass is given and if the _id doesn't exist (this is a new document), the doc _id will be formed using the docClass
+    // This will allow quick and easy retrival of doc types using only the doc's primary key (_id) 
+    // returns a promise or an the error object.
+    public saveDoc(doc,docClass?) {
       let _self = this;
       if (doc._id) {
         return this.database.get(doc._id).then(resultDoc => {
@@ -306,7 +315,10 @@ export class PouchdbService {
           }
         });
       } else {
-        return this.database.post(doc)
+        if (docClass) {
+          doc._id = docClass+'|'+this.guid();
+          return this.saveDoc(doc);
+        } else return this.database.post(doc)
                 .then(response => { return response }
                 ).catch(err => {
                   console.error(err);
@@ -315,6 +327,8 @@ export class PouchdbService {
       }		
     }
   
+    // DEPRECATED
+    // use saveDoc instead as it includes a brand new doc creation if the doc doesn't contain an _id attribute
     public createDoc(doc) {
       return this.database.put(doc).then(response => { return response }
         ).catch(err => {
@@ -353,6 +367,7 @@ export class PouchdbService {
               VINS
   
     ********************************************************************/
+    // DEPRECATED : use getDocsOfType instead. It's more performant as it relies on base couchDB filtering on primary doc key (_id)
     public getVins() {
       return this.database.allDocs({include_docs: true}).then( result => {
         return result.rows.filter( row => {
@@ -366,6 +381,7 @@ export class PouchdbService {
       catch((error) => {return error});
     }
   
+    // DEPRECATED : use saveDoc instead (attention : the _id attribute will then become something like 'vin|UUID' and not include the wine name and year anymore which makes things easier)
     public saveVin (vin) {
       let _self = this;
       let newVin = vin;

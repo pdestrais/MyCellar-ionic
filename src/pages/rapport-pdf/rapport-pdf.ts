@@ -33,8 +33,9 @@ export class RapportPDFPage {
     var y = startY;
     var pageNum = 0;
 
-    this.pouch.getVins().then(vins => this.vins = vins.map(v => v.doc))
-    .then(() => {
+    this.pouch.getDocsOfType('vin').then(vins => {
+        this.vins = vins;
+        console.log("[Rapport - cellarToPDF]#wine loaded : "+this.vins.length);
         // first report dimension is wine type
         this.typesGrouping = d3.nest()
         .key(function(d:any) { return d.type.nom; })
@@ -173,8 +174,9 @@ export class RapportPDFPage {
                         },this);
                 },this);
             },this);
-          },this); 
-        /* after type level */		
+              }
+    )// = vins.map(v => v.doc))
+    /* after type level */		
     this.doc.setFontSize(14);
     this.doc.setTextColor(0);
     this.doc.setDrawColor(0);					

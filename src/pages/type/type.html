@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>
+      {{'page.type' | translate }}
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding id="page5">
+  <div *ngIf="typeList && typeList.length>0">
+      <ion-list>
+          <ion-item *ngFor="let type of typeList" (click)="editType(type)">
+            {{ type.nom }}
+            <button ion-button item-end clear icon-end>  
+              <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
+            </button>  
+          </ion-item>
+      </ion-list>
+      <button id="longue-button5" ion-button color="positive" block (click)="editType(type)">
+          {{'general.add' | translate }} {{'type' | translate }}
+        </button>
+  </div>
+  <div *ngIf="newType || (type._id && type._id !='')">
+      <alert></alert>
+      <form [formGroup]="typeForm" id="type-form4">
+        <ion-item id="type-input1">
+          <ion-label floating translate>type</ion-label>
+          <ion-input [(ngModel)]="type.nom" type="text" placeholder="{{ 'type' | translate }}" formControlName="type" text-right
+          [class.invalid]="!typeForm.controls.type.valid && (typeForm.controls.type.dirty || submitted)"></ion-input>
+        </ion-item>
+        <ion-item *ngIf="!typeForm.controls.type.valid  && (typeForm.controls.type.dirty || submitted)">
+          <p class="invalid">{{'type' | translate }} {{"general.required" | translate }}</p>
+        </ion-item>
+      </form>
+      <button id="longue-button5" ion-button color="primary" block (click)="saveType(type)">
+                {{'general.save' | translate }}
+      </button>
+      <button id="longue-button5" ion-button color="danger" block (click)="deleteType(type)">
+          {{'general.suppress' | translate }}
+      </button>
+  </div>
+  
+</ion-content>

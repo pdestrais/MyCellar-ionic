@@ -87,10 +87,13 @@
     "sure":"Are you sure ?",
     "cancel":"Cancel",
     "ok":"ok",
-    "required":"is required"
+    "required":"is required",
+    "isDeleted":"is deleted",
+    "isNotDeleted":"is not deleted"
   },
   "english":"English",
   "french":"French",
   "red":"Red",
-  "white":"White"
+  "white":"White",
+  "type":"type"
 }

@@ -6,6 +6,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { VinPage } from '../pages/vin/vin';
 import { AppellationPage } from '../pages/appellation/appellation';
 import { RegionPage } from '../pages/region/region';
+import { TypePage } from '../pages/type/type';
 import { RapportPage } from '../pages/rapport/rapport';
 import { RapportPDFPage } from '../pages/rapport-pdf/rapport-pdf';
 import { StatsPage } from '../pages/stats/stats';
@@ -82,6 +83,10 @@ export class MyApp {
   }
   goToRegion(){
     this.navCtrl.setRoot(RegionPage,{action:'list'});
+  }
+  goToType(params){
+    if (!params) params = {};
+    this.navCtrl.setRoot(TypePage,{action:'list'});
   }
   goToRapport(params){
     if (!params) params = {};

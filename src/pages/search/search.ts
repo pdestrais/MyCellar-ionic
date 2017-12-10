@@ -57,8 +57,8 @@ export class SearchPage {
   }
 
   loadVins() {
-      this.pouchDB.getVins().then(vins => {
-        this.vins = vins.map(v => v.doc);
+      this.pouchDB.getDocsOfType('vin').then(vins => {
+        this.vins = vins;
         this.loading = false; 
         console.log("[SearchPage - loadVins]Vin loaded - # vins"+this.vins?this.vins.length:"undefined");
       })

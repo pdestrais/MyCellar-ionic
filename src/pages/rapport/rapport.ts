@@ -30,14 +30,13 @@ export class RapportPage {
       this.breadcrumb[0] =  {selected:ddStruct.type,back:3};
       this.breadcrumb[1] =  {selected:ddStruct.origine,back:2};
       this.breadcrumb[2] =  {selected:ddStruct.year,back:1};
-      this.pouch.getVins()
+      this.pouch.getDocsOfType('vin')
       .then(vins => { this.vinsFiltered = vins.filter(v => {
-                                              return (v.doc.nbreBouteillesReste != 0 && 
-                                                  v.doc.type.nom == ddStruct.type.key && 
-                                                  v.doc.origine.pays+' - '+v.doc.origine.region == ddStruct.origine.key &&
-                                                  v.doc.annee == ddStruct.year.key ); 
-                                            })
-                                      .map(v => v.doc);
+                                              return (v.nbreBouteillesReste != 0 && 
+                                                  v.type.nom == ddStruct.type.key && 
+                                                  v.origine.pays+' - '+v.origine.region == ddStruct.origine.key &&
+                                                  v.annee == ddStruct.year.key ); 
+                                            });
               
                       console.debug("[Rapport - ionViewDidLoad]# vins loaded with type/region/annee: "+this.vinsFiltered.length+" - "+ddStruct.type.key+"/"+ddStruct.origine.key+"/"+ddStruct.year.key);
       });      
@@ -47,48 +46,51 @@ export class RapportPage {
       this.breadcrumb[1] =  {text:ddStruct.origine.key,number:ddStruct.origine.value,selected:ddStruct.origine,back:1};
       //this.typesGrouping = undefined;
       //this.typesOrigineGrouping = undefined;
-      this.pouch.getVins()
-      .then(vins => { this.vins = vins.map(v => v.doc);
-              console.debug("[Rapport - ionViewDidLoad]# vins loaded with type/region: "+this.vins.length+" - "+ddStruct.type.key+"/"+ddStruct.origine.key);
-            this.typesOrigineYearGrouping = d3.nest()
-              .key(function(d:any) { return d.annee; })
-              .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
-              .entries(this.vins.filter(function(d) { return (d.nbreBouteillesReste !=0 && 
-                                                              d.type.nom == ddStruct.type.key && 
-                                                              d.origine.pays+' - '+d.origine.region == ddStruct.origine.key) 
-                                                    }));
-              console.log("[Rapport - ionViewDidLoad]typesOrigineYearGrouping : "+JSON.stringify(this.typesOrigineYearGrouping));
-              this.typesOrigineYearGrouping.sort(function (a, b) {
-                if (a.key < b.key) { return -1; }
-                if (a.key > b.key) { return 1; }
-                // names must be equal
-                return 0;
-            })
-});      
+      this.pouch.getDocsOfType('vin')
+      .then(vins => { 
+          this.vins = vins;
+          console.debug("[Rapport - ionViewDidLoad]# vins loaded with type/region: "+this.vins.length+" - "+ddStruct.type.key+"/"+ddStruct.origine.key);
+          this.typesOrigineYearGrouping = d3.nest()
+            .key(function(d:any) { return d.annee; })
+            .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
+            .entries(this.vins.filter(function(d) { return (d.nbreBouteillesReste !=0 && 
+                                                            d.type.nom == ddStruct.type.key && 
+                                                            d.origine.pays+' - '+d.origine.region == ddStruct.origine.key) 
+                                                  }));
+            console.log("[Rapport - ionViewDidLoad]typesOrigineYearGrouping : "+JSON.stringify(this.typesOrigineYearGrouping));
+            this.typesOrigineYearGrouping.sort(function (a, b) {
+              if (a.key < b.key) { return -1; }
+              if (a.key > b.key) { return 1; }
+              // names must be equal
+              return 0;
+          })
+      });      
     } else if (ddStruct && ddStruct.type) {
       //let viewStack:any = this.navCtrl._views;
       this.breadcrumb[0] =  {text:ddStruct.type.key,number:ddStruct.type.value,selected:ddStruct.type,back:1};
       //this.typesGrouping = undefined;
-      this.pouch.getVins()
-      .then(vins => { this.vins = vins.map(v => v.doc);
-              console.debug("[Rapport - ionViewDidLoad]# vins loaded with type: "+this.vins.length+" - "+ddStruct.type.nom);
-            this.typesOrigineGrouping = d3.nest()
-              .key(function(d:any) { return d.origine.pays+' - '+d.origine.region; })
-              .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
-              .entries(this.vins.filter(function(d) { return (+d.nbreBouteillesReste !=0 && 
-                                                              d.type.nom == ddStruct.type.key) 
-                                                    }));
-              console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesOrigineGrouping));
+      this.pouch.getDocsOfType('vin')
+      .then(vins => { 
+          this.vins = vins;
+          console.debug("[Rapport - ionViewDidLoad]# vins loaded with type: "+this.vins.length+" - "+ddStruct.type.nom);
+          this.typesOrigineGrouping = d3.nest()
+            .key(function(d:any) { return d.origine.pays+' - '+d.origine.region; })
+            .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
+            .entries(this.vins.filter(function(d) { return (+d.nbreBouteillesReste !=0 && 
+                                                            d.type.nom == ddStruct.type.key) 
+                                                  }));
+            console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesOrigineGrouping));
       });      
     } else if (!ddStruct) {
-      this.pouch.getVins()
-      .then(vins => { this.vins = vins.map(v => v.doc);
-              console.debug("[Rapport - ionViewDidLoad]# vins loaded : "+this.vins.length);
-              this.typesGrouping = d3.nest()
-              .key(function(d:any) { return d.type.nom; })
-              .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
-              .entries(this.vins.filter(function(d:any) { return (d.nbreBouteillesReste != 0 || d.nbreBouteillesReste != "0") }));
-              console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesGrouping));
+      this.pouch.getDocsOfType('vin')
+      .then(vins => { 
+          this.vins = vins;
+          console.debug("[Rapport - ionViewDidLoad]# vins loaded : "+this.vins.length);
+          this.typesGrouping = d3.nest()
+          .key(function(d:any) { return d.type.nom; })
+          .rollup(function(v) { return d3.sum(v, function(d:any) { return d.nbreBouteillesReste; }); })
+          .entries(this.vins.filter(function(d:any) { return (d.nbreBouteillesReste != 0 || d.nbreBouteillesReste != "0") }));
+          console.log("[Rapport - ionViewDidLoad]typesGrouping : "+JSON.stringify(this.typesGrouping));
       });
     } 
   }

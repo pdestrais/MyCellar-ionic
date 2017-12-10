@@ -59,7 +59,7 @@ export class VinPage {
         appellation: ['',Validators.required],
         nbreBouteillesAchat: [0,Validators.required],
         nbreBouteillesReste: [0,Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
-        prixAchat: [0,Validators.compose([Validators.pattern('[0-9]*(?:[.,])[0-9]*'), Validators.required])],
+        prixAchat: [0,Validators.compose([Validators.pattern('[0-9]*(?:[.,])?[0-9]'), Validators.required])],
         dateAchat: ['',Validators.required],
         localisation: ['',Validators.required]      
     });
@@ -99,7 +99,7 @@ export class VinPage {
             this.vin.history.push({type:'comment',date:this.vin.lastUpdated,comment:this.vin.remarque,difference:0});
             this.vin.remarque='';
         }
-        this.pouch.saveVin(this.vin)
+        this.pouch.saveDoc(this.vin,'vin')
         .then(response => {
                 if (response.ok) { 
                     console.debug("[Vin - saveVin]vin "+ JSON.stringify(this.vin)+"saved");

@@ -9,6 +9,7 @@ import { RapportPDFPage } from '../pages/rapport-pdf/rapport-pdf';
 import { VinPage } from '../pages/vin/vin';
 import { ConfigurationPage } from '../pages/configuration/configuration';
 import { AppellationPage } from '../pages/appellation/appellation';
+import { TypePage } from '../pages/type/type';
 import { RegionPage } from '../pages/region/region';
 import { StatsPage } from '../pages/stats/stats';
 import { SearchPage } from '../pages/search/search';
@@ -44,6 +45,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     VinPage,
     ConfigurationPage,
     AppellationPage,
+    TypePage,
     RegionPage,
     StatsPage,
     SearchPage,
@@ -73,6 +75,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     VinPage,
     ConfigurationPage,
     AppellationPage,
+    TypePage,
     RegionPage,
     StatsPage,
     SearchPage,
