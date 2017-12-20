@@ -12,7 +12,8 @@
   },
   "config":{
     "dbServerURL": "URL server DB distant",
-    "language" : "langage"
+    "language" : "langage",
+    "setDBServer": "connecter serveur de données"
   },
   "wine":{
     "name":"nom",

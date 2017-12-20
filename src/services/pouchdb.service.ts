@@ -14,7 +14,6 @@ export class PouchdbService {
     private DBlistener = new Subject<any>();
     private subject = new Subject<any>();
 
-    private remoteServerUrl:string = '';
     private dbUpToDate:boolean = false;
   
     public vinView:string = 'indexVin';

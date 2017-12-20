@@ -12,7 +12,8 @@
   },
   "config":{
     "dbServerURL": "DB server URL",
-    "language" : "language"
+    "language" : "language",
+    "setDBServer": "set database server"
   },
   "wine":{
     "name":"name",

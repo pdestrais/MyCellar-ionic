@@ -1,5 +1,6 @@
+import { Subject } from 'rxjs/Subject';
 import { TranslateService } from '@ngx-translate/core';
-import { Component } from '@angular/core';
+import { Component,OnInit,OnDestroy } from '@angular/core';
 import { NavController, NavParams, AlertController,ModalController,ViewController,Platform } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SimpleCacheService } from './../../services/simpleCache.service';
@@ -7,12 +8,13 @@ import { PouchdbService } from './../../services/pouchdb.service';
 import { VinModel, AppellationModel, OrigineModel,TypeModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
 import { SearchPage } from '../search/search'
+import moment from 'moment';
 
 @Component({
   selector: 'page-vin',
   templateUrl: 'vin.html'
 })
-export class VinPage {
+export class VinPage implements OnInit,OnDestroy {
 
   public paramId:string;
   public nbreAvantUpdate:number = 0;
@@ -25,6 +27,7 @@ export class VinPage {
   public errors:Array<any>;   
   public vinForm:FormGroup;
   public submitted:boolean;
+  private obs:Subject<string> = new Subject();
 
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
@@ -34,22 +37,8 @@ export class VinPage {
               public alertService:AlertService,
               public translate:TranslateService,
               public alertController:AlertController,
-              public modalCtrl: ModalController) {
+              public modalCtrl:ModalController) {
     console.log('[VinPage constructor]params is :'+JSON.stringify(navParams));
-    this.paramId = navParams.get('id');
-    this.pouch.getDocsOfType('origine')
-    .then(result => {   this.origines = result;
-                        //console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
-                    });
-    this.pouch.getDocsOfType('appellation')
-    .then(result => {   this.appellations = result;
-                        //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
-                    });
-        
-    this.pouch.getDocsOfType('type')
-    .then(result => {   this.types = result;
-                        //console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
-                    });  
     this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));
     this.vinForm = formBuilder.group({
         nom: ['',Validators.required],
@@ -64,22 +53,68 @@ export class VinPage {
         localisation: ['',Validators.required]      
     });
     this.submitted = false;
-}
+  }   
   
+  public ngOnInit() {
+    console.log("[Vin - ngOnInit]called");
+    this.paramId = this.navParams.get('id');
+    this.obs.subscribe(message => {
+        console.log('ngOnInit Subject emitted test message '+message)
+        if (this.paramId) {
+           this.pouch.getDoc(this.paramId)
+           .then(vin => {
+               console.log("vin "+JSON.stringify(vin));
+               Object.assign(this.vin, vin); 
+               this.nbreAvantUpdate=this.vin.nbreBouteillesReste; 
+               this.newWine=false;
+               console.log("[Vin - ngOnInit]Vin loaded : "+JSON.stringify(this.vin));
+           });
+       } else {
+           let now = moment();
+           // Search for type that correspond to "red" and use it's _id to initialize the vin attribute
+           if (this.types && this.types.length > 0) {
+               let preselectedType = this.types.find(e => {
+                                                               return (e.nom == "Rouge" || e.nom == "Red")
+                                                           });
+               this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
+                                       new AppellationModel('','',''),
+                                       new OrigineModel('','',''),
+                                       new TypeModel(preselectedType._id,''));
+           } else
+               this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
+                                   new AppellationModel('','',''),
+                                   new OrigineModel('','',''),
+                                   new TypeModel('',''));    
+       }
+   });
+
+   this.pouch.getDocsOfType('origine')
+   .then(result => {   this.origines = result;
+                       //console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
+                   });
+   this.pouch.getDocsOfType('appellation')
+   .then(result => {   this.appellations = result;
+                       //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
+                   });
+       
+   this.pouch.getDocsOfType('type')
+   .then(result => {   this.types = result;
+                       console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
+                       this.obs.next('typeLoaded');
+                   });  
+ }
+
+  public ngOnDestroy() {
+    console.log("[Vin - ngOnDestroy]called");
+    this.obs.unsubscribe();
+  }
+
+  public ionViewWillEnter() {
+    console.log("[Vin - ionViewWillEnter]called");    
+  }
+
   public ionViewDidLoad() {
     console.log("[Vin - ionViewDidLoad]called");
-    console.log("[Vin - ionViewDidLoad]Vin initialized : "+JSON.stringify(this.vin));
-    if (this.paramId) {
-        this.pouch.getDoc(this.paramId)
-        .then(vin => {
-            console.log("vin "+JSON.stringify(vin));
-            Object.assign(this.vin, vin); 
-            this.nbreAvantUpdate=this.vin.nbreBouteillesReste; 
-            this.newWine=false;
-            console.log("[Vin - ionViewDidLoad]Vin loaded : "+JSON.stringify(this.vin));
-        });
-    } else
-        this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));    
   }
 
   public saveVin() {
