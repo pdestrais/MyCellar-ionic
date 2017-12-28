@@ -1,0 +1,6 @@
+---
+applications:
+- name:      mycellarApp-PWA
+  host:      mycellarApp-PWA-1
+  memory:    64M
+  buildpack: https://github.com/cloudfoundry-community/staticfile-buildpack.git

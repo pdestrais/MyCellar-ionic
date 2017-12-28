@@ -1,242 +1,169 @@
 import { TranslateService } from '@ngx-translate/core';
 import { AlertService } from './alert.service';
 import { Injectable } from '@angular/core';
-//import { NavController } from 'ionic-angular';
-import { SimpleCacheService } from './simpleCache.service';
 import PouchDB from 'pouchdb';
-import { Observable } from 'rxjs';
 import { Subject } from 'rxjs/Subject';
 
 @Injectable()
 export class PouchdbService {
 
     private database: any;
-    private DBlistener = new Subject<any>();
-    private subject = new Subject<any>();
-
-    private dbUpToDate:boolean = false;
+    private settingsDB: any;
+    private settingsDoc: any;
+    private activeSyncUrl: string;
+    private activeSync: any;
+    private pouchDBServiceSubject: Subject<any>;
   
-    public vinView:string = 'indexVin';
-    public appellationView:string = 'indexAppellation';
-    public origineView:string = 'indexOrigine';
-    public typeView:string = 'indexType';
-
     public constructor(/* public navCtrl: NavController, */ 
-                        private cache:SimpleCacheService, 
                         private alertService:AlertService, 
                         private translateService:TranslateService) {
-      // this.init();
-     }
-
-    public sync(remote: string) { 
-      let remoteDatabase = new PouchDB(remote);
-      this.database.sync(remoteDatabase, {
-          live: true, since: 'now', include_docs: true
-      }).on('change', change => {
-          this.DBlistener.next({change:change,message:'change received'});
-          this.handleEventChanges(change);
-      });
-    }
-
-    private handleEventChanges(change) {
-      if (change.deleted){ 
-        this.cache.delete(change.doc.type+'List', change.doc._id)
-      } else 
-        this.cache.set(change.doc.type+'List',change.doc._id,change.doc)
-    }
-
-    public getListener() { 
-      return this.DBlistener;
-    }
-
-    public getMessage(): Observable<any> {
-      return this.subject.asObservable();
-    }
-
-    public switchDB(newConfig) {
-      let _self = this;
-      this.database.destroy().then(response => {
-        // destroy local database
-        console.info("database destroyed");
-        this.database = new PouchDB('cave');
-        // replicate remote DB to local
-        this.DBlistener.next({change:undefined,message:'ReplicationStarts'});          
-        PouchDB.replicate(newConfig.serverUrl,this.database)
-        .on('complete', function (info) {
-          // handle complete
-          _self.DBlistener.next({change:undefined,message:'ReplicationEnds'});
-          // store new config in local db
-          _self.put('config', newConfig)
-          .then(result => {
-            console.info("new config saved - pointing to : "+newConfig.serverUrl);
-            _self.alertService.success(_self.translateService.instant('general.newConfigSaved'));
-            _self.syncDB();
-          })
-          .catch(err => {
-            console.info("new config not saved");
-            _self.alertService.success(_self.translateService.instant('general.newConfigNotSaved'))
-          });
-        })
-        .on('error', function (err) {
-          // handle error
-          _self.DBlistener.next({error:err,message:'ReplicationError'});
-        });;
-      });		
-    }
-  
-
-    public init() {
-      console.log("[PouchDBService init]called");
+      this.settingsDB = new PouchDB('settings');
       this.database = new PouchDB('cave');
-      //this.database.setMaxListeners(20);
-      this.database.info().then( info => {
-        console.log('We have a database: ' + JSON.stringify(info));
-        this.database.get('config').then(result => {
-          let remoteServerUrl = result.serverUrl;
-          this.DBlistener.next({change:undefined,message:'SyncStarts'});
-          this.subject.next({type: 'configLoaded', message: result});
-          console.info('Start syncing with: ' + remoteServerUrl);
-          this.syncDB();
-        })
-        .catch(err => this.subject.next({ type: 'error', message: 'DB not configured' }));
-      });
+      this.pouchDBServiceSubject = new Subject();
+      this.settingsDB.get('settings')
+        .then((doc) => {
+          this.settingsDoc = doc;
+          if (this.settingsDoc) {
+            if (this.settingsDoc && this.settingsDoc.language && this.settingsDoc.language.length >=0 ) {
+              this.translateService.use(this.settingsDoc.language)
+            } else {
+              this.settingsDoc.language= "english";
+              this.translateService.use("english");
+            } 
+            if (this.settingsDoc.syncUrl)
+              this.applySyncUrl(this.settingsDoc.syncUrl, 0);
+          }
+        }).catch((err) => {
+          // first time the application is started. Setting doc is created and saved with default language (english)
+          console.log("[PouchDBService Constructor]settings not set" +JSON.stringify(err));
+          this.translateService.use("english");
+          this.settingsDoc = {
+            _id: 'settings',
+            language: "english"
+          }
+          this.settingsDB.put(this.settingsDoc)
+          .then((response) => {
+            this.settingsDoc._id = response.id;
+            this.settingsDoc._rev = response.rev;
+            this.alertService.success(this.translateService.instant('general.newAppInstance'),undefined,"dialog")            
+          }).catch(function (err) {
+            console.log(err);
+            this.alertService.success(this.translateService.instant('general.newConfigNotSaved'))
+          });  
+
+        });
     }
-  
-    public syncDB() {
-      console.log("[PouchDBService syncDB]called");
-      let _self = this; 
-      this.database.get('config').then(result => {
-        console.log("[PouchDBService syncDB]syncing with : "+result.serverUrl);       
-        this.database.sync(result.serverUrl, {
+    
+    /*  Start synchronization with a remote DB located with its syncURL.
+        parameters :
+        - syncType :  0. indicates that the sync continues with the server previously used. All current data remain, sync just starts (most common case)
+                      1. indicates that the user chose to start a sync with a new server while keeping its local data. The 2 databases are merged together. Than the synchronisation continues
+                      2. indicates that the user deletes all current data and start syncing with a new server. This means that all data from the remote server will be used to initialize the local database.  
+    */
+    applySyncUrl(syncUrl: string, syncType: number) {
+      // if the newly given syncUrl is the same as the previous one, don't do anything
+      if (syncUrl != this.activeSyncUrl) {
+        switch (syncType) {
+          case (1) :
+            // sync to new server
+            // If this is the first remote DB setup, we need to create a settings document
+            if (this.settingsDoc == null) {
+              this.settingsDoc = {
+                _id: 'settings',
+                syncUrl: syncUrl
+              }
+            }
+            else {
+              this.settingsDoc["syncUrl"] = syncUrl;
+            }
+            // new settings are written to settingDB and when done, start syncing
+            this.settingsDB.put(this.settingsDoc)
+              .then((response) => {
+                this.activeSyncUrl = syncUrl;
+                this.settingsDoc._id = response.id;
+                this.settingsDoc._rev = response.rev;
+                this.startSync();
+              }).catch(function (err) {
+                console.log(err);
+                this.alertService.success(this.translateService.instant('general.newConfigNotSaved'))
+              });  
+          case (2) :
+            // replicate, then sync to new server
+            // If this is the first remote DB setup, we need to create a settings document
+            if (this.settingsDoc == null) {
+              this.settingsDoc = {
+                _id: 'settings',
+                syncUrl: syncUrl
+              }
+            }
+            else {
+              this.settingsDoc["syncUrl"] = syncUrl;
+            }
+            // destroy current database, then start replication.
+            // When replication is succesfull,  new settings are written to settingDB and we start replicating.
+            this.database.destroy().then(response => {
+              // destroy local database
+              console.info("database destroyed");
+              this.database = new PouchDB('cave');
+              // replicate remote DB to local
+              this.pouchDBServiceSubject.next({type:"replication",message:'ReplicationStarts'});          
+              PouchDB.replicate(syncUrl,this.database)
+              .on('complete', (info) => {
+                // handle complete
+                this.pouchDBServiceSubject.next({type:"replication",message:'ReplicationEnds'});
+                // new settings are written to settingDB and when done, start syncing
+                this.settingsDB.put(this.settingsDoc)
+                  .then((response) => {
+                    this.activeSyncUrl = syncUrl;
+                    this.settingsDoc._id = response.id;
+                    this.settingsDoc._rev = response.rev;
+                    this.startSync();
+                  }).catch(function (err) {
+                    console.log(err);
+                    this.alertService.success(this.translateService.instant('general.newConfigNotSaved'))
+                  });  
+              })
+              .on('error', (err) => {
+                // handle error
+                this.pouchDBServiceSubject.next({type:"error",error:err,message:'ReplicationError'});
+              });;
+            });		      
+          default :
+            // standard startup 
+            this.activeSyncUrl = syncUrl;
+            this.startSync();
+        }
+      }
+    }
+
+     startSync() {
+      if (this.activeSync) {
+        this.activeSync.cancel()
+        this.activeSync = null;
+      }
+      if (this.activeSyncUrl && this.activeSyncUrl.length > 0) {
+        const settings = new PouchDB(this.activeSyncUrl);
+        this.activeSync = this.database.sync(settings, {
           live: true,
           retry: true
-          })
-        .on('change', function (info) {
-          console.info('Database changed : ' + JSON.stringify(info));
-        }).on('paused', function (err) {
-          _self.dbUpToDate = true;
-            console.info('Database paused');
-            console.info('databaseUpToDate Event emitted '+JSON.stringify(err));
-            //_self.loadRefDataInCache();
-          _self.DBlistener.next({change:undefined,message:'dbUpToDate'});
-        }).on('active', function () {
-          console.info('Database active : ');
-        }).on('denied', function (err) {
-          console.info('Database access denied : ' + JSON.stringify(err));
-        }).on('complete', function (info) {
-          console.info('Database access completed : ' + JSON.stringify(info));
-          _self.DBlistener.next({change:undefined,message:'SyncEnds'});
-        }).on('error', function (err) {
-          console.error('Database error : ' + JSON.stringify(err));
+        }).on('change', (change) => {
+          if (change.direction == "pull") {
+            this.pouchDBServiceSubject.next({type:"activeSync",change:change});
+          }
+        }).on('error', (err) => {
+          this.pouchDBServiceSubject.next({type:"error",error:err});
         });
-  
-
-      })
-      .catch(err => this.subject.next({ type: 'error', message: 'DB not configured' }));
-    }
-  
-/*     public loadOriginesRefList() {
-      return this.database.query('indexOrigine',{include_docs:true})
-              .then(result => result.rows.map(doc => this.cache.set('origineList',doc.id, doc.value)))
-    }
-  
-    public loadAppellationsRefList() {
-      return this.database.query('indexAppellation',{include_docs:true})
-            .then(result => result.rows.map(doc => this.cache.set('appellationList',doc.id, doc.value)))
-    }
-  
-    public loadTypesRefList() {
-      return this.database.query('indexType',{include_docs:true})
-            .then(result => result.rows.map(doc => this.cache.set('typeList',doc.id, doc.value)))
-    }
-  
-    public loadRefDataInCache() {
-      return Promise.all([this.loadOriginesRefList(),this.loadAppellationsRefList(),this.loadTypesRefList()]);
-    }
-  
- */    private createDesignDoc(name, mapFunction, reduceFunction) {
-      let ddoc = {
-        _id: '_design/' + name,
-        views: {
-        }
-      };
-      if (reduceFunction) {
-        ddoc.views[name] = { map: mapFunction.toString(), reduce: reduceFunction.toString() };
-      } else {
-        ddoc.views[name] = { map: mapFunction.toString() };
       }
-      return ddoc;
     }
-  
-    public createdatabaseViews() {
-      // Creation des view dans database locale
-      console.info("Création des vues ...");
-      // view used to check if there is no wine already with this name|annee
-      let indexVinView = this.createDesignDoc('indexVin',
-                                              "function (doc) { if (doc && doc._id.substring(0,3) == 'vin') {emit(doc.nom+'|'+doc.annee,doc);} }",
-                                              undefined);
-      this.database.put(indexVinView)
-      .then(doc => console.info('indexVinView created'))
-      .catch(err => console.info('indexVinView already exists: ' + JSON.stringify(err)));
-  
-      // view used to check if there is no appellation already with this appellation courte|longue
-      let indexAppellationView = this.createDesignDoc('indexAppellation',
-                                                      "function (doc) { if (doc && doc.courte && doc.longue) {emit(doc.courte+'|'+doc.longue,doc);} }",
-                                                      undefined);
-      this.database.put(indexAppellationView)
-      .then(doc => console.info('indexAppellationView created'))
-      .catch(err => console.info('indexAppellationView already exists: ' + JSON.stringify(err)));
-  
-      // view used to check if there is no origine already with this pays|region
-      let indexOrigineView = this.createDesignDoc('indexOrigine',
-                                                  "function (doc) { if (doc && doc.pays && doc.region) {emit(doc.pays+'|'+doc.region,doc);} }",
-                                                  undefined);
-      this.database.put(indexOrigineView)
-      .then(doc => console.info('indexOrigineView created'))
-      .catch(err => console.info('indexOrigineView already exists: ' + JSON.stringify(err)));
-          
-      // view used to check if there is no type already with this name
-      let indexTypeView = this.createDesignDoc('indexType',
-                                                "function (doc) { if (doc && doc._id.substring(0,4)=='type') {emit(doc.nom,doc);} }",
-                                                undefined);
-      this.database.put(indexTypeView)
-      .then(doc => console.info('indexTypeView created'))
-      .catch(err => console.info('indexTypeView already exists: ' + JSON.stringify(err)));
-          
-      // view used to check if there is no type already with this name
-      let usedAppellationView = this.createDesignDoc('usedAppellation',
-                                                      "function (doc) { if (doc && doc._id.substring(0,3) == 'vin') {emit(doc.appellation.id);} }",
-                                                      undefined);
-      this.database.put(usedAppellationView)
-      .then(doc => console.info('usedAppellationView created'))
-      .catch(err => console.info('usedAppellationView already exists: ' + JSON.stringify(err)));
       
-      // view used to check if there is no type already with this name
-      let selectAppellationView = this.createDesignDoc('selectAppellation',
-                                                      "function (doc) { if (doc && doc._id.substring(0,3) == 'vin') {emit(doc.appellation.id,doc);} }",
-                                                      undefined);
-      this.database.put(selectAppellationView)
-      .then(doc => console.info("selectAppellationView created"))
-      .catch(err => console.info("selectAppellationView already exists: " + JSON.stringify(err)));
-  
-      // view used to check if there is no type already with this name
-      var selectOrigineView = this.createDesignDoc('selectOrigine',
-                                                    "function (doc) { if (doc && doc._id.substring(0,3) == 'vin') {emit(doc.origine.id,doc);} }",
-                                                    undefined);
-      this.database.put(selectOrigineView)
-      .then(doc => console.info('selectOrigineView created'))
-      .catch(err => console.info('selectOrigineView already exists: ' + JSON.stringify(err)));
-  
-      // view to be used for reports
-      let reportVinView = this.createDesignDoc('reportVin',
-          `function(doc) { if(doc && doc.nbreBouteillesReste && parseInt(doc.nbreBouteillesReste,10)>0) { 
-                emit([doc.type.nom,doc.origine.pays,doc.origine.region,doc.nom,doc.annee], parseInt(doc.nbreBouteillesReste,10));
-            }
-          }`,'_sum');
-      this.database.put(reportVinView)
-      .then(doc => console.info('reportVinView created'))
-      .catch(err => console.info('reportVinView already exists: ' + JSON.stringify(err)));
+    public getPouchDBListener() { 
+      return this.pouchDBServiceSubject;
     }
+
+    public getSettingsDB() {
+      return this.settingsDB;
+    }
+
   
     /*******************************************************************
   
@@ -261,10 +188,6 @@ export class PouchdbService {
               });
           }
         });
-    }
-
-    public test(){
-      console.log("test");
     }
 
     public newGetDoc( id:string ) {
@@ -326,77 +249,48 @@ export class PouchdbService {
       }		
     }
   
-    // DEPRECATED
-    // use saveDoc instead as it includes a brand new doc creation if the doc doesn't contain an _id attribute
-    public createDoc(doc) {
-      return this.database.put(doc).then(response => { return response }
-        ).catch(err => {
-          console.error(err);
-          return err;
+    public genericSaveDoc(db:any,doc:any,docClass?:string) {
+      if (doc._id) {
+        return db.get(doc._id).then(resultDoc => {
+          doc._rev = resultDoc._rev;
+          return db.put(doc);
+        }).then(response => {
+          return response;
+        }).catch(err => {
+          if (err.status == 404) {
+            return db.put(doc).then(response => { return response }
+                ).catch(err => {
+                  console.error(err);
+                  return err;
+                });
+          } else {
+            console.error(err);
+            return err;
+          }
         });
-    }
-  
-    public getCollection(viewName){
-      return this.database.query(viewName,{include_docs:true})
-      .then(result => {return result.rows}).catch(err => {console.error(err); return err;});
+      } else {
+        if (docClass) {
+          doc._id = docClass+'|'+this.guid();
+          return this.genericSaveDoc(db,doc);
+        } else return db.post(doc)
+                .then(response => { return response }
+                ).catch(err => {
+                  console.error(err);
+                  return err;
+                });
+      }		      
     }
 
     public getDocsOfType(type:string) {
       return this.database.allDocs({include_docs: true,startkey: type+'|', endkey: type+'|\ufff0'})
       .then( result => {
-        return result.rows.map(res => res.doc);
+        if (result && result.rows)
+          return result.rows.map(res => res.doc);
+        else 
+          return [];
       }).
-      catch((error) => {return error});
+      catch((error) => {console.log("result error : "+JSON.stringify(error)); return error});
       
-/*       return this.database.allDocs({include_docs: true}).then( result => {
-        return result.rows.filter( row => {
-          if( !row.doc._id.match(new RegExp("^"+type,"i")) ) {
-            return false;
-          } else {
-            return true;
-          }
-        })
-        .map(res => res.doc);
-      }).
-      catch((error) => {return error});
- */    }
-
-    /*******************************************************************
-  
-              VINS
-  
-    ********************************************************************/
-    // DEPRECATED : use getDocsOfType instead. It's more performant as it relies on base couchDB filtering on primary doc key (_id)
-    public getVins() {
-      return this.database.allDocs({include_docs: true}).then( result => {
-        return result.rows.filter( row => {
-          if( !row.doc._id.match(new RegExp("^vin","i")) ) {
-            return false;
-          } else {
-            return true;
-          }
-        });
-      }).
-      catch((error) => {return error});
-    }
-  
-    // DEPRECATED : use saveDoc instead (attention : the _id attribute will then become something like 'vin|UUID' and not include the wine name and year anymore which makes things easier)
-    public saveVin (vin) {
-      let _self = this;
-      let newVin = vin;
-      let newId = "vin|"+vin.nom+"|"+vin.annee;
-      if (!vin._id) {
-        //Nouveau vin à créer avec l'Id généré.
-        newVin._id = newId;
-        return this.createDoc(newVin).then(result => {return result}).catch(err => {return err});
-      } else if (vin._id == newId) {
-        // Existing wine and No update in name or year => just update wine
-        return this.saveDoc(vin).then(result => {return result}).catch(err => {return err});			
-      } else {
-        // existing wine and update done in name or year => create a new wine (with newId) and delete the one with previous id (vin.id).
-        return this.createDoc(newVin).then(_self.deleteDoc(vin).then(result => {})).catch(err => {return err});
-      }
-    
     }
   
     /*******************************************************************
@@ -406,12 +300,7 @@ export class PouchdbService {
     ********************************************************************/
   
     public getSettings() {
-      return this.database.get('settings').then( result => {
-        return result;
-      }).catch( error => {
-        console.warn('Settings do not exist yet');
-  
-      });
+      return this.settingsDoc;
     }
   
     public updateConfig( config ) {

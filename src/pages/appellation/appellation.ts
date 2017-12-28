@@ -3,7 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
-import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
 import { AppellationModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
@@ -22,7 +21,6 @@ export class AppellationPage {
   
   constructor(public navCtrl: NavController,
               public navParams: NavParams, 
-              public cache:SimpleCacheService, 
               public pouch:PouchdbService,
               public formBuilder: FormBuilder,
               public alertService:AlertService,
@@ -40,9 +38,8 @@ export class AppellationPage {
     console.log("[AppellationPage - ionViewDidLoad]called");
     // If we come on this page on the first time, the parameter action should be set to 'list', so that we get the see the list of appellations 
     if (this.navParams.get('action')=='list') {
-      this.pouch.getCollection(this.pouch.appellationView)
-      .then(appellations => appellations.map(a => 
-        this.appellationList.push(a.value)));   
+      this.pouch.getDocsOfType('appellation')
+      .then(appellations => this.appellationList = appellations);   
         console.log("[AppellationPage - ionViewDidLoad]appellationList : "+JSON.stringify(this.appellationList));        
     } 
     // if we come on this page with the action parameter set to 'edit', this means that we either want to add a new appellation (id parameter is not set)
@@ -72,7 +69,7 @@ export class AppellationPage {
     if (this.appellationForm.valid) {
         // validation succeeded
         console.debug("[Appellation - AppellationVin]Appellation valid");
-        this.pouch.saveDoc(this.cleanValidatorModelObject(this.appellation))
+        this.pouch.saveDoc(this.cleanValidatorModelObject(this.appellation),'appellation')
         .then(response => {
                 if (response.ok) { 
                     console.debug("[Appellation - saveAppellation]Appellation "+ JSON.stringify(this.appellation)+"saved");

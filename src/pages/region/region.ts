@@ -3,7 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
-import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
 import { OrigineModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
@@ -24,7 +23,6 @@ export class RegionPage {
   
   constructor(public navCtrl: NavController,
               public navParams: NavParams, 
-              public cache:SimpleCacheService, 
               public pouch:PouchdbService,
               public formBuilder: FormBuilder,
               public alertService:AlertService,
@@ -43,9 +41,8 @@ export class RegionPage {
     console.log("[Region - ionViewDidLoad]called");
     // If we come on this page on the first time, the parameter action should be set to 'list', so that we get the see the list of origines 
     if (this.navParams.get('action')=='list') {
-      this.pouch.getCollection(this.pouch.origineView)
-      .then(origines => origines.map(a => 
-        this.origineList.push(a.value)));      
+      this.pouch.getDocsOfType('origine')
+      .then(origines => this.origineList = origines);      
     } 
     // if we come on this page with the action parameter set to 'edit', this means that we either want to add a new origine (id parameter is not set)
     // or edit an existing one (id parameter is set)
@@ -74,7 +71,7 @@ export class RegionPage {
     if (this.origineForm.valid) {
         // validation succeeded
         console.debug("[Origine - OrigineVin]Origine valid");
-        this.pouch.saveDoc(this.cleanValidatorModelObject(this.origine))
+        this.pouch.saveDoc(this.cleanValidatorModelObject(this.origine),'origine')
         .then(response => {
                 if (response.ok) { 
                     console.debug("[Origine - saveOrigine]Origine "+ JSON.stringify(this.origine)+"saved");

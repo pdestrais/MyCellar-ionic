@@ -9,15 +9,17 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page5">
-  <div *ngIf="appellationList && appellationList.length>0">
-      <ion-list>
+  <div *ngIf="appellationList">
+      <div *ngIf="appellationList.length>0">
+        <ion-list>
           <ion-item *ngFor="let appellation of appellationList" (click)="editAppellation(appellation)">
             {{ appellation.courte }} - {{appellation.longue}}
             <button ion-button item-end clear icon-end>  
               <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
             </button>  
           </ion-item>
-      </ion-list>
+        </ion-list>
+      </div>
       <button id="longue-button5" ion-button color="positive" block (click)="editAppellation(appellation)">
           {{'general.add' | translate }} {{'appellation.appellation' | translate }}
         </button>

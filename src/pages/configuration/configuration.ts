@@ -15,6 +15,7 @@ export class ConfigurationPage {
   public config:any = {};
   public supportedLanguages:Array<any> = [{name:'french',locale:'fr-FR'},{name:'english', locale:'en-US'}];
   public loading:boolean = false;
+  public synced:boolean = false;
 
   constructor(public navCtrl: NavController, 
               public alertCtrl: AlertController, 
@@ -22,66 +23,46 @@ export class ConfigurationPage {
               public translate: TranslateService,
               public alertService:AlertService,
               public zone:NgZone) {
-//    this.config = {id:'config', serverUrl : 'http://localhost:5984/copy_cave_prod', language:'english' };
   }
   
   ionViewDidLoad() {
     console.log("viewname :"+this.navCtrl.getActive().name);
-    this.pouchDB.getDoc("config").then(response => {
-      if (response.status == 404) {
-        console.log('[configuration - ionViewDidLoad]status 404 received');
-        this.config = {id:'config', serverUrl : 'http://localhost:5984/copy_cave_prod', language:'english' };
-      }
+    this.config = this.pouchDB.getSettings();
+    if (this.config) {
+      if (this.config.language)
+        this.translate.use(this.config.language);
+      if (this.config.syncUrl)
+        this.config.syncUrl?this.synced = true:this.synced=false;
       else {
-        console.log('[configuration - ionViewDidLoad]response received');
-        this.config = response;
-        if (this.config.language)
-          this.translate.use(this.config.language);
+        this.config = {id:'syncUrl', syncUrl : 'https://userid:password@serverurl/dbname', language:'english' };
+        this.synced = false;
       }
-    }).catch(err => {
-      console.log("error getting config in activate");
-      this.alertService.error(this.translate.instant('DBError'));
-    });    
+    }
   }
 
-  saveConfig() {
-    let _self = this;
-    this.pouchDB.getListener().subscribe((change) => {
-      if (change.message == 'ReplicationStarts') {
+  syncWithRemoteDB(overwrite:boolean) {
+    this.pouchDB.getPouchDBListener().subscribe((event) => {
+      if (event.type == 'replication' && event.message == 'ReplicationStarts') {
         console.log('ReplicationEnds Event received in save config'); 
-        _self.loading = true;
+        this.loading = true;
       }
-      if (change.message == 'ReplicationEnds') {
+      if (event.type == 'replication' && event.message == 'ReplicationEnds') {
         console.log('ReplicationEnds Event received in save config'); 
-        _self.loading = false;
-
-        /*         let alert = this.alertCtrl.create({
-          title: 'Confirmation',
-          subTitle: 'url serveur DB changée',
-          buttons: ['OK']
-        });
-        alert.present();
-        this.pouchDB.init();
- */       this.navCtrl.setRoot(SearchPage);          
+        this.loading = false;
+       this.navCtrl.setRoot(SearchPage);          
        }
     });
-    this.pouchDB.switchDB(this.config);  
+    if (overwrite)
+      this.pouchDB.applySyncUrl(this.config.syncUrl,2);  
+    else 
+      this.pouchDB.applySyncUrl(this.config.syncUrl,1);
   }
 
   languageChange(val: any) {
     this.config.language = val;
     console.log('Language Change:', val);
     this.zone.run(() => this.translate.use(this.config.language));
-    this.pouchDB.saveDoc(this.config);
+    this.pouchDB.genericSaveDoc(this.pouchDB.getSettingsDB(),this.config);
   }
-
-  showSuccess() {
-    this.alertService.success('test success');
-  }
-
-  showError() {
-    this.alertService.error('test error');
-  }
-
     
 }

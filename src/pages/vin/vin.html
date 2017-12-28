@@ -96,7 +96,7 @@
       <ion-label>
         {{'wine.price' | translate }}
       </ion-label>
-      <ion-input [(ngModel)]="vin.prixAchat" type="number" placeholder="Prix" formControlName="prixAchat" text-right
+      <ion-input [(ngModel)]="vin.prixAchat" type="text" placeholder="Prix" formControlName="prixAchat" text-right
       [class.invalid]="!vinForm.controls.prixAchat.valid && (vinForm.controls.prixAchat.dirty || submitted)" 
       (blur)="toNumber('prixAchat')"></ion-input>
     </ion-item>

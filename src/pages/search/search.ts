@@ -15,7 +15,7 @@ import 'rxjs/add/operator/debounceTime';
 
 export class SearchPage {
 
-  private vins:Array<VinModel>;
+  public vins:Array<VinModel>=[];
   public searchTerm: string = '';
   public vinsForSearch:Array<VinModel>;
   public stock:boolean;
@@ -31,21 +31,18 @@ export class SearchPage {
 
   ionViewDidLoad() {
     console.debug("[SearchPage]in ionViewDidLoad");
-/*     this.pouchDB.getListener().subscribe((change) => {
-      if (change.message == 'SyncStarts') {
-        this.loading = true;
+    this.pouchDB.getPouchDBListener().subscribe((event) => {
+      if (event.type == "activeSync") {
+        console.log('[SearchPage - ionViewDidLoad]change received : '+JSON.stringify(event.change));
+        this.loadVins();
       } 
-      if (change.message == 'dbUpToDate') {
-        console.log('dbUpToDate Event received in ionViewDidLoad'); 
-        this.loadVins();               
-      }
     });
- */}
+ }
 
   ionViewWillEnter() {
     console.debug("[SearchPage]in ionViewWillEnter");
     this.loading = true;
-    this.loadVins()
+    this.loadVins();
     this.searchControl.valueChanges.debounceTime(500).subscribe(search => { 
       if (this.searchTerm.length == 0)
         this.items = [];
@@ -57,12 +54,13 @@ export class SearchPage {
   }
 
   loadVins() {
-      this.pouchDB.getDocsOfType('vin').then(vins => {
+    console.debug("[SearchPage]in loadVins");
+      this.pouchDB.getDocsOfType('vin').then((vins) => {
         this.vins = vins;
         this.loading = false; 
-        console.log("[SearchPage - loadVins]Vin loaded - # vins"+this.vins?this.vins.length:"undefined");
+        this.vins?console.log("[SearchPage - loadVins]Vin loaded - # vins : "+this.vins.length):console.log("[SearchPage - loadVins]Vin loaded - # vins : undefined");
       })
-      .catch(error => {
+      .catch((error) => {
         console.log("[SearchPage - loadVins]problem to load vins");
         //this.loading = false;
       });        

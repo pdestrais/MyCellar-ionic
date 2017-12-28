@@ -3,65 +3,43 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-<!--     <ion-buttons start>
-      <button ion-button icon-left>
-        <ion-icon name="menu"></ion-icon>
-        Menu
-      </button>
-    </ion-buttons>
- -->    <ion-title>
+    <ion-title>
           {{'page.config' | translate }}
     </ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content padding id="config">
     <alert></alert>
-<!--   <form id="configuration-form6">
-    <ion-item id="configuration-input14">
-      <ion-label floating>
-        {{'config.dbServerURL' | translate}}
-      </ion-label>
-      <ion-input [(ngModel)]="config.serverUrl" type="text" placeholder="URL Serveur DB" name="serverURL"></ion-input>
-    </ion-item>
-    <ion-item id="configuration-select5">
-      <ion-label floating>
-          {{'config.language' | translate }}
-      </ion-label>
-      <ion-select [(ngModel)]="config.language" (ionChange)="languageChange($event)" name="langue" interface="popover">
-          <ion-option *ngFor="let lang of supportedLanguages" [value]="lang.name">
-              {{lang.name | translate }}
-          </ion-option>
-      </ion-select>
-    </ion-item>
-    <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
-        {{'general.save' | translate }}
-    </button>
- --><!--     <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
-        Sauvegarde
-    </button>
- -->
-<!--   </form>
- -->  <ion-list>
+   <ion-list>
+      <ion-card>
+        <ion-card-content>
+            <p>{{'config.dbSettingExplain1' | translate}}</p>
+            <p>{{'config.dbSettingExplain2' | translate}}</p>
+            <ol>
+                <li>{{'config.dbSettingExplain3' | translate}}</li>
+                <li>{{'config.dbSettingExplain4' | translate}}</li>
+            </ol>
+        </ion-card-content>
+      </ion-card>
       <ion-list-header>
-          {{'config.dbServerURL' | translate}}
-          <button ion-button icon-only item-end clear>
-            <ion-icon name="sync"></ion-icon>
-          </button>
-      </ion-list-header>
-      <form id="configuration-form6">
+            {{'config.dbServerURL' | translate}}
+            <button ion-button icon-only item-end clear>
+              <ion-icon name="sync"></ion-icon>
+            </button>
+        </ion-list-header>
+        <form id="configuration-form6">
           <ion-item id="configuration-input14">
 <!--             <ion-label floating>
               {{'config.dbServerURL' | translate}}
             </ion-label>
- -->            <ion-input [(ngModel)]="config.serverUrl" type="text" placeholder="URL Serveur DB" name="serverURL"></ion-input>
+ -->            <ion-input [(ngModel)]="config.syncUrl" type="text" placeholder="URL Serveur DB" name="serverURL"></ion-input>
           </ion-item>
-          <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
-              {{'config.setDBServer' | translate }}
+          <button id="configuration-button7" ion-button color="positive" block (click)="syncWithRemoteDB(false)">
+              {{'config.startSync' | translate }}
           </button>
-      <!--     <button id="configuration-button7" ion-button color="positive" block (click)="saveConfig()">
-              Sauvegarde
+          <button id="configuration-button8" ion-button color="positive" block (click)="syncWithRemoteDB(true)">
+            {{'config.overwriteAndSync' | translate }}
           </button>
-       -->
         </form>
         <ion-list-header>
             {{'config.language' | translate }}

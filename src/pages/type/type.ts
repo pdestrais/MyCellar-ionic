@@ -4,7 +4,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController } from 'ionic-angular';
-import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
 import { AlertService } from './../../services/alert.service';
 
@@ -22,7 +21,6 @@ export class TypePage {
   
   constructor(public navCtrl: NavController,
               public navParams: NavParams, 
-              public cache:SimpleCacheService, 
               public pouch:PouchdbService,
               public formBuilder: FormBuilder,
               public alertService:AlertService,

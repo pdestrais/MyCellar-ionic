@@ -1,6 +1,6 @@
 import { TranslateService } from '@ngx-translate/core';
 import { NavController, AlertController } from 'ionic-angular';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { AlertService } from '../../services/alert.service';

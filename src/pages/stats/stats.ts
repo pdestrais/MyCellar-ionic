@@ -39,7 +39,7 @@ export class StatsPage {
   }
 
   ngOnInit() {
-    this.pouch.getVins().then(vins => vins = this.vins = vins.map(v => v.doc));
+    this.pouch.getDocsOfType('vin').then(vins => { this.vins = vins });
   }
 
   draw() {

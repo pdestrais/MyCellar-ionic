@@ -3,7 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { Component,OnInit,OnDestroy } from '@angular/core';
 import { NavController, NavParams, AlertController,ModalController,ViewController,Platform } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { SimpleCacheService } from './../../services/simpleCache.service';
 import { PouchdbService } from './../../services/pouchdb.service';
 import { VinModel, AppellationModel, OrigineModel,TypeModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
@@ -28,10 +27,10 @@ export class VinPage implements OnInit,OnDestroy {
   public vinForm:FormGroup;
   public submitted:boolean;
   private obs:Subject<string> = new Subject();
+  public priceRegExp:RegExp = new RegExp("^[0-9]+(,[0-9]{1,2})?$");
 
   constructor(public navCtrl: NavController, 
               public navParams: NavParams, 
-              public cache:SimpleCacheService, 
               public pouch:PouchdbService,
               public formBuilder: FormBuilder,
               public alertService:AlertService,
@@ -48,7 +47,8 @@ export class VinPage implements OnInit,OnDestroy {
         appellation: ['',Validators.required],
         nbreBouteillesAchat: [0,Validators.required],
         nbreBouteillesReste: [0,Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
-        prixAchat: [0,Validators.compose([Validators.pattern('[0-9]*(?:[.,])?[0-9]'), Validators.required])],
+        prixAchat: [0,Validators.compose([Validators.pattern('^[0-9]+((,[0-9]{1,2})|(.[0-9]{1,2}))?$'), Validators.required])],
+//        prixAchat: [0,Validators.required],
         dateAchat: ['',Validators.required],
         localisation: ['',Validators.required]      
     });
@@ -168,10 +168,7 @@ public deleteVin() {
                 this.pouch.deleteDoc(this.vin).then(response => {
                     if (response.ok) {
                         this.alertService.success(this.translate.instant('wine.wineDeleted'),SearchPage,'dialog');
-/*                         this.pouch.getCollection(this.pouch.vinView)
-                        .then(vins => vins.map(v => this.cache.set("vinList",v._id,v)));
-                        this.navCtrl.setRoot(SearchPage);
- */                    } else {
+                    } else {
                         this.alertService.error(this.translate.instant('wine.wineNotDeleted'),undefined,'dialog');                        
                     }
                 });
@@ -239,7 +236,8 @@ public deleteVin() {
     } 
 
     public toNumber(attribute:string){
-        this.vin[attribute] = +this.vin[attribute];
+        this.vin[attribute] = this.vin[attribute].replace(",", '.');
+        this.vin[attribute] = parseFloat(this.vin[attribute]);
         console.log(attribute+' changed: '+this.vin[attribute]);
       }
 }

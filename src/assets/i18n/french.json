@@ -13,7 +13,13 @@
   "config":{
     "dbServerURL": "URL server DB distant",
     "language" : "langage",
-    "setDBServer": "connecter serveur de données"
+    "setDBServer": "connecter serveur de données",
+    "dbSettingExplain1":"Vous pouvez synchroniser vos données locales avec une base de données distante (cela peut être une 'Apache CouchDB', 'IBM Cloudant' ou 'PouchDB server').",
+    "dbSettingExplain2":"2 modes sont possibles : ",
+    "dbSettingExplain3":"Garder votre contenu local et synchroniser avec la base de données existante distante. Instructions : entrez l'url du serveur, incluant vos authentifiants et la nom de la base de données et appuyez sur 'Syncroniser'",
+    "dbSettingExplain4":"écraser le contenu local avec celui d'une base de données distante existante et ensuite, continuer à synchroniser. Instructions : entrez l'url du serveur, incluant vos authentifiants et la nom de la base de données et appuyez sur 'Effacer et syncroniser'",
+    "startSync":"Syncroniser",
+    "overwriteAndSync":"Effacer et syncroniser"
   },
   "wine":{
     "name":"nom",
@@ -32,7 +38,7 @@
     "wineDeleted":"Le vin est effacé",
     "wineNotDeleted":"Le vin n'est pas effacé",
     "addComment":"Ajout commentaire",
-    "priceFormatInvalid":"Le format est invalide (ex : 15.0)",
+    "priceFormatInvalid":"le format est invalide (ex : 15.0)",
     "addedOn":"Ajouté le ",
     "addedExtractedOn":"Vin ajouté ou sorti le ",
     "difference":"différence",
@@ -88,7 +94,8 @@
     "sure":"Etes-vous sûr ?",
     "cancel":"Annuler",
     "ok":"ok",
-    "required":"Est requis",
+    "or":"ou",
+    "required":"est requis",
     "isDeleted":"est effacé",
     "isNotDeleted":"n'est pas effacé"
   },

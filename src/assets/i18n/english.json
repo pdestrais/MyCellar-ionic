@@ -13,7 +13,13 @@
   "config":{
     "dbServerURL": "DB server URL",
     "language" : "language",
-    "setDBServer": "set database server"
+    "setDBServer": "set database server",
+    "dbSettingExplain1":"You can synchronize your cellar data with a remote database (can be Apache CouchDB, IBM Cloudant or PouchDB server).",
+    "dbSettingExplain2":"2 modes are possible : ",
+    "dbSettingExplain3":"keep local content you currently have and synchronize with an existing remote database. Instructions : Supply the URL, including credentials and database name and hit 'Start Sync'.",
+    "dbSettingExplain4":"copy content from an existing remote database and synchronize. This will overwrite any local content you currently have. Instructions : Supply the URL, including credentials and database name and hit 'Overwrite and Sync'",
+    "startSync":"Start Sync",
+    "overwriteAndSync":"Overwrite and Sync"
   },
   "wine":{
     "name":"name",
@@ -88,9 +94,11 @@
     "sure":"Are you sure ?",
     "cancel":"Cancel",
     "ok":"ok",
+    "or":"or",
     "required":"is required",
     "isDeleted":"is deleted",
-    "isNotDeleted":"is not deleted"
+    "isNotDeleted":"is not deleted",
+    "newAppInstance":"You're just starting using the application. Languages preferences are not set, therefore english is used. To choose your language, go to configuration."
   },
   "english":"English",
   "french":"French",

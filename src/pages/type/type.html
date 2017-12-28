@@ -9,15 +9,17 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page5">
-  <div *ngIf="typeList && typeList.length>0">
-      <ion-list>
+  <div *ngIf="typeList">
+      <div *ngIf="typeList.length>0">
+        <ion-list>
           <ion-item *ngFor="let type of typeList" (click)="editType(type)">
             {{ type.nom }}
             <button ion-button item-end clear icon-end>  
               <ion-icon color="dark" name='md-arrow-dropright-circle'></ion-icon>
             </button>  
           </ion-item>
-      </ion-list>
+        </ion-list>
+      </div>
       <button id="longue-button5" ion-button color="positive" block (click)="editType(type)">
           {{'general.add' | translate }} {{'type' | translate }}
         </button>

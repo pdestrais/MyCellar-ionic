@@ -9,8 +9,9 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page5">
-  <div *ngIf="origineList && origineList.length>0">
-        <ion-list>
+    <div *ngIf="origineList">
+      <div *ngIf="origineList.length>0">
+          <ion-list>
             <ion-item *ngFor="let origine of origineList" (click)="editOrigine(origine)">
               {{ origine.pays }} - {{origine.region}}
               <button ion-button item-end clear icon-end>  
@@ -18,9 +19,10 @@
               </button>  
             </ion-item>
         </ion-list>
-        <button id="region-button5" ion-button color="positive" block (click)="editOrigine(origine)">
-            {{'general.add' | translate }} {{'origin.region' | translate }}
-          </button>
+      </div>
+      <button id="region-button5" ion-button color="positive" block (click)="editOrigine(origine)">
+          {{'general.add' | translate }} {{'origin.region' | translate }}
+        </button>
     </div>
     <div *ngIf="newOrigine || (origine._id && origine._id !='')">
         <alert></alert>
