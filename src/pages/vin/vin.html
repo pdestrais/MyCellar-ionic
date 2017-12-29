@@ -48,7 +48,7 @@
       <ion-label>
         {{'wine.origin' | translate }}
       </ion-label>
-      <ion-select [(ngModel)]="vin.origine.id" formControlName="origine" interface="popover" (ionChange)="origineChange($event)">
+      <ion-select [(ngModel)]="vin.origine.id" formControlName="origine" (ionChange)="origineChange($event)">
         <ion-option *ngFor="let origine of origines" [value]="origine._id">
             {{origine.pays}} - {{ origine.region }}
         </ion-option>
@@ -61,7 +61,7 @@
       <ion-label>
         {{'wine.appellation' | translate }}
       </ion-label>
-      <ion-select [(ngModel)]="vin.appellation.id" formControlName="appellation" interface="popover" (ionChange)="appellationChange($event)">
+      <ion-select [(ngModel)]="vin.appellation.id" formControlName="appellation"(ionChange)="appellationChange($event)">
         <ion-option *ngFor="let appellation of appellations" [value]="appellation._id">
             {{appellation.courte}} - {{ appellation.longue }}
         </ion-option>

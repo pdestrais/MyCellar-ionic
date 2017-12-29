@@ -1,6 +1,7 @@
 .sourcemaps
 hooks
 node_modules
-platform
+platforms
+plugins
 resources
 src

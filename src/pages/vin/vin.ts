@@ -76,10 +76,17 @@ export class VinPage implements OnInit,OnDestroy {
                let preselectedType = this.types.find(e => {
                                                                return (e.nom == "Rouge" || e.nom == "Red")
                                                            });
-               this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
+                //console.log("preselected type is : "+JSON.stringify(preselectedType));
+                if (preselectedType)
+                    this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                        new AppellationModel('','',''),
                                        new OrigineModel('','',''),
-                                       new TypeModel(preselectedType._id,''));
+                                       new TypeModel(preselectedType._id,preselectedType.nom));
+                else
+                    this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
+                                            new AppellationModel('','',''),
+                                            new OrigineModel('','',''),
+                                            new TypeModel('',''));    
            } else
                this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                    new AppellationModel('','',''),
@@ -89,17 +96,27 @@ export class VinPage implements OnInit,OnDestroy {
    });
 
    this.pouch.getDocsOfType('origine')
-   .then(result => {   this.origines = result;
+   .then(result => {   
+                        this.origines = result;
+                       this.origines.sort((a,b) => {
+                            return ((a.pays+a.region)<(b.pays+b.region)?-1:1); 
+                        });
                        //console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
                    });
    this.pouch.getDocsOfType('appellation')
    .then(result => {   this.appellations = result;
-                       //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
+                        this.appellations.sort((a,b) => {
+                            return ((a.courte+a.longue)<(b.courte+b.longue)?-1:1); 
+                        });
+                        //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
                    });
        
    this.pouch.getDocsOfType('type')
    .then(result => {   this.types = result;
-                       console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
+                        this.types.sort((a,b) => {
+                            return ((a.nom)<(b.nom)?-1:1); 
+                        });
+                    //console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
                        this.obs.next('typeLoaded');
                    });  
  }

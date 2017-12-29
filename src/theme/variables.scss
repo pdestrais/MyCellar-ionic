@@ -45,7 +45,7 @@ $colors: (
 // App iOS Variables
 // --------------------------------------------------
 // iOS only Sass variables can go here
-
+$alert-ios-max-width:                           100% !default;
 
 
 
@@ -54,6 +54,7 @@ $colors: (
 // Material Design only Sass variables can go here
 
 $item-md-detail-push-show : true;
+$alert-md-max-width:                          100% !default;
 
 
 // App Windows Variables
