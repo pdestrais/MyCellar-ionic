@@ -1,6 +1,7 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpModule } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 //import { NavController } from 'ionic-angular';
 import { MyApp } from './app.component';
@@ -54,6 +55,7 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   imports: [
     BrowserModule,
+    HttpModule,
     FormsModule,
     HttpClientModule,
     IonicModule.forRoot(MyApp),  

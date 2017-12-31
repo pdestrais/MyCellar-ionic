@@ -4,10 +4,13 @@ import { Component,OnInit,OnDestroy } from '@angular/core';
 import { NavController, NavParams, AlertController,ModalController,ViewController,Platform } from 'ionic-angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PouchdbService } from './../../services/pouchdb.service';
-import { VinModel, AppellationModel, OrigineModel,TypeModel } from '../../models/cellar.model'
+import { VinModel, AppellationModel, OrigineModel,TypeModel, CoteModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
 import { SearchPage } from '../search/search'
+import { Http,Response } from '@angular/http';
 import moment from 'moment';
+import HTMLParser from 'fast-html-parser'
+import 'rxjs/add/operator/map';
 
 @Component({
   selector: 'page-vin',
@@ -36,9 +39,10 @@ export class VinPage implements OnInit,OnDestroy {
               public alertService:AlertService,
               public translate:TranslateService,
               public alertController:AlertController,
-              public modalCtrl:ModalController) {
+              public modalCtrl:ModalController,
+              public http:Http) {
     console.log('[VinPage constructor]params is :'+JSON.stringify(navParams));
-    this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''));
+    this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''),'',0,[]);
     this.vinForm = formBuilder.group({
         nom: ['',Validators.required],
         annee: ['',Validators.compose([Validators.minLength(4),Validators.maxLength(4), Validators.pattern('[0-9]*'), Validators.required])],
@@ -67,7 +71,15 @@ export class VinPage implements OnInit,OnDestroy {
                Object.assign(this.vin, vin); 
                this.nbreAvantUpdate=this.vin.nbreBouteillesReste; 
                this.newWine=false;
-               console.log("[Vin - ngOnInit]Vin loaded : "+JSON.stringify(this.vin));
+               // Updating appellation and origine with their updated values
+/*                this.pouch.getDoc(this.vin.appellation._id)
+               .then(appellation => this.vin.appellation = <AppellationModel>this.pouch.cleanModelObject(appellation));
+               this.pouch.getDoc(this.vin.origine._id)
+               .then(origine => this.vin.origine = <OrigineModel>this.pouch.cleanModelObject(origine));               
+               this.pouch.getDoc(this.vin.type._id)
+               .then(type => { this.vin.type = <TypeModel>this.pouch.cleanModelObject(type); 
+                            });               
+ */               console.log("[Vin - ngOnInit]Vin loaded : "+JSON.stringify(this.vin));
            });
        } else {
            let now = moment();
@@ -81,17 +93,17 @@ export class VinPage implements OnInit,OnDestroy {
                     this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                        new AppellationModel('','',''),
                                        new OrigineModel('','',''),
-                                       new TypeModel(preselectedType._id,preselectedType.nom));
+                                       new TypeModel(preselectedType._id,preselectedType.nom),'',0,[]);
                 else
                     this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                             new AppellationModel('','',''),
                                             new OrigineModel('','',''),
-                                            new TypeModel('',''));    
+                                            new TypeModel('',''),'',0,[]);    
            } else
                this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                    new AppellationModel('','',''),
                                    new OrigineModel('','',''),
-                                   new TypeModel('',''));    
+                                   new TypeModel('',''),'',0,[]);    
        }
    });
 
@@ -253,10 +265,36 @@ public deleteVin() {
     } 
 
     public toNumber(attribute:string){
-        this.vin[attribute] = this.vin[attribute].replace(",", '.');
-        this.vin[attribute] = parseFloat(this.vin[attribute]);
+        if (typeof this.vin[attribute] === 'string') {
+            this.vin[attribute] = this.vin[attribute].replace(",", '.');
+            this.vin[attribute] = parseFloat(this.vin[attribute]);    
+        }
         console.log(attribute+' changed: '+this.vin[attribute]);
       }
+
+    public getGWSScore(){
+        console.log("getting GWS score");
+        // Create url
+        let prefix = '/api/';
+        let url = prefix+this.cleanForUrl(this.vin.nom)+"-"+this.cleanForUrl(this.vin.origine.region)+"/"+this.vin.annee+"/";
+        //let url1 = '/api/chateau-maucaillou-moulis-en-medoc/2009/'
+        this.http.get(url)
+                    .map((res:Response,index:number) => res.text()).subscribe((html) => {
+                        let root = HTMLParser.parse(html);
+                        let score:HTMLElement = root.querySelector('h2.score');
+                        let firstNode:any = score.firstChild;
+                        let rawScoreTxt:string = firstNode.rawText;
+                        if (!rawScoreTxt.search("not enough data"))
+                            this.vin.GWSScore = parseFloat(rawScoreTxt.trim());
+                    },
+                (error) => {console.log("http get error : "+JSON.stringify(error.status))});
+    
+    }
+
+    private cleanForUrl(text:string){
+        return text.toLowerCase().replace(/ /g,"-").replace(/'/g,"").replace(/â/g,"a").replace(/é/g,"e").replace(/è/g,"e").replace(/ê/g,"e").replace(/û/g,"u").replace(/ô/g,"o").replace(/î/g,"i")
+    }
+     
 }
 
 @Component({

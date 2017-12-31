@@ -64,5 +64,12 @@ export class ConfigurationPage {
     this.zone.run(() => this.translate.use(this.config.language));
     this.pouchDB.genericSaveDoc(this.pouchDB.getSettingsDB(),this.config);
   }
-    
+  
+  checkDataQuality(){
+    this.pouchDB.checkDataQuality();
+  }
+
+  adaptDB() {
+    this.pouchDB.adaptDBStruct();
+  }
 }

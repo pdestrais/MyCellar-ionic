@@ -56,5 +56,11 @@
           </ion-item>
                       
     </ion-list>    
-  <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
+    <button id="configuration-button-check" ion-button color="positive" block (click)="checkDataQuality()">
+      check data quality
+    </button>
+    <button id="configuration-button-check" ion-button color="positive" block (click)="adaptDB()">
+      adapt DB
+    </button>
+    <ion-spinner *ngIf="loading" name="bubbles"></ion-spinner>
 </ion-content>

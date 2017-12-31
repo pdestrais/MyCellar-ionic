@@ -1,3 +1,4 @@
+import { VinModel } from './../models/cellar.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AlertService } from './alert.service';
 import { Injectable } from '@angular/core';
@@ -143,10 +144,14 @@ export class PouchdbService {
       }
       if (this.activeSyncUrl && this.activeSyncUrl.length > 0) {
         const settings = new PouchDB(this.activeSyncUrl);
-        this.activeSync = this.database.sync(settings, {
-          live: true,
+        console.log("[PouchDBService]Start syncing with remore DB with settings : "+JSON.stringify(settings));
+        console.log("[PouchDBService]Start syncing with remore DB @ : "+this.activeSyncUrl);
+        //this.activeSync = this.database.sync(settings, {
+        this.activeSync = this.database.sync(this.activeSyncUrl, {
+            live: true,
           retry: true
         }).on('change', (change) => {
+          console.log("[PouchDBService]change event received - change is : "+JSON.stringify(change));
           if (change.direction == "pull") {
             this.pouchDBServiceSubject.next({type:"activeSync",change:change});
           }
@@ -292,11 +297,96 @@ export class PouchdbService {
       catch((error) => {console.log("result error : "+JSON.stringify(error)); return error});
       
     }
-  
+
     /*******************************************************************
-  
+              UTILITY
+    ********************************************************************/
+
+    public checkDataQuality(){
+      this.getDocsOfType('vin').then(result => {
+        if (result) {
+          console.log("[checkDataQuality]# vins : "+result.length)
+          // check that all vin.origine have an '_id' attribute
+          let countOrigine_id = 0;
+          let countOrigineid = 0;
+          let countAppellation_id = 0;
+          let countAppellationid = 0;
+          let countType_id = 0;
+          let countTypeid = 0;
+          result.map(v => {
+            if (v.origine._id) {
+              countOrigine_id++;
+              console.log("[checkDataQuality]origine._id for vin : "+v.nom+" - "+v.annee);
+            }
+            else 
+            if (v.origine.id) {
+              if (!v.origine.id.startsWith("origine|"))
+                console.log("[checkDataQuality]DOESN'T Start with origine| for vin : "+v.nom+" - "+v.annee);
+              countOrigineid++;
+            }
+            if (v.appellation._id) {
+              countAppellation_id++;
+              console.log("[checkDataQuality]appellation._id for vin : "+v.nom+" - "+v.annee);
+            }
+            else 
+            if (v.appellation.id) {
+              if (!v.appellation.id.startsWith("appellation|"))
+                console.log("[checkDataQuality]DOESN'T Start with appellation| for vin : "+v.nom+" - "+v.annee);
+              countAppellationid++;
+            }
+            if (v.type._id) {
+              countType_id++;
+              console.log("[checkDataQuality]type._id for vin : "+v.nom+" - "+v.annee);
+            }
+            else 
+            if (v.type.id) {
+              if (!v.type.id.startsWith("type|"))
+                console.log("[checkDataQuality]DOESN'T Start with type| for vin : "+v.nom+" - "+v.annee);
+              countTypeid++;
+            }
+          });
+          console.log("[checkDataQuality]countOrigine_id - countOrigineid : "+countOrigine_id+" - "+countOrigineid);
+          console.log("[checkDataQuality]countAppellation_id - countAppellationid : "+countAppellation_id+" - "+countAppellationid);
+          console.log("[checkDataQuality]countType_id - countTypeid : "+countType_id+" - "+countTypeid);
+        }
+      })
+    }
+
+    public adaptDBStruct() {
+      this.getDocsOfType('vin').then(result => {
+        if (result) {
+          result.map(v => {
+            let changed=false;
+            if (v.origine.id && v.origine.id.startsWith('origine|')) {
+              v.origine._id = v.origine.id;
+              delete v.origine.id;   
+              changed = true;          
+            }
+            if (v.appellation.id && v.appellation.id.startsWith('appellation|')) {
+              v.appellation._id = v.appellation.id;
+              delete v.appellation.id;  
+              changed = true;           
+            }
+            if (v.type.id && v.type.id.startsWith('type|')) {
+              v.type._id = v.type.id;
+              delete v.type.id;    
+              changed = true;         
+            }
+            if (v.id) {
+              delete v.id;   
+              changed = true;          
+            }            
+            if (changed) {
+              this.saveDoc(v,'vin');
+              console.log("vin adapté :"+JSON.stringify(v));
+            }
+          });
+        }
+      });
+    }
+
+    /*******************************************************************
               SETTINGS
-  
     ********************************************************************/
   
     public getSettings() {
@@ -332,5 +422,14 @@ export class PouchdbService {
       }
       return _p8(false) + _p8(true) + _p8(true) + _p8(false);
     }
+
+    public cleanModelObject(obj) {
+      let result={};
+      for (var key in obj) {
+          if (key.charAt(0)!='_' || (key=='_id' && obj[key])) result[key]=obj[key];
+      }
+      return result;
+  }
+  
   
 }

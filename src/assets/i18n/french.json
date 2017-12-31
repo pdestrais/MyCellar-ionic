@@ -43,7 +43,9 @@
     "addedExtractedOn":"Vin ajouté ou sorti le ",
     "difference":"différence",
     "or":"ou",
-    "minmax":"doit avoir au moins 4 chiffres"
+    "minmax":"doit avoir au moins 4 chiffres",
+    "apogee":"apogee",
+    "GWSScore": "Score GWS (Global Wine System)"
   },
   "appellation":{
     "appellation":"appellation",

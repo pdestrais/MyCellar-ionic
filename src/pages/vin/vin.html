@@ -35,7 +35,7 @@
       <ion-label>
         {{'wine.type' | translate }}
       </ion-label>
-      <ion-select [(ngModel)]="vin.type.id" formControlName="type" interface="popover" (ionChange)="typeChange($event)">
+      <ion-select [(ngModel)]="vin.type._id" formControlName="type" interface="popover" (ionChange)="typeChange($event)">
         <ion-option *ngFor="let type of types" [value]="type._id">
             {{type.nom | translate }}
         </ion-option>
@@ -48,7 +48,7 @@
       <ion-label>
         {{'wine.origin' | translate }}
       </ion-label>
-      <ion-select [(ngModel)]="vin.origine.id" formControlName="origine" (ionChange)="origineChange($event)">
+      <ion-select [(ngModel)]="vin.origine._id" formControlName="origine" (ionChange)="origineChange($event)">
         <ion-option *ngFor="let origine of origines" [value]="origine._id">
             {{origine.pays}} - {{ origine.region }}
         </ion-option>
@@ -61,7 +61,7 @@
       <ion-label>
         {{'wine.appellation' | translate }}
       </ion-label>
-      <ion-select [(ngModel)]="vin.appellation.id" formControlName="appellation"(ionChange)="appellationChange($event)">
+      <ion-select [(ngModel)]="vin.appellation._id" formControlName="appellation"(ionChange)="appellationChange($event)">
         <ion-option *ngFor="let appellation of appellations" [value]="appellation._id">
             {{appellation.courte}} - {{ appellation.longue }}
         </ion-option>
@@ -129,21 +129,34 @@
         {{'wine.contains' | translate }}
       </ion-label>
       <ion-input [(ngModel)]="vin.contenance" type="text" placeholder="75 - 150 cl" text-right></ion-input>
-    </ion-item>
-    <ion-item *ngIf="vin.history && vin.history.length>0" (click)="showHistory()">
-        {{'wine.history' | translate }}
-        <button ion-button item-end outline icon-end>
-          <ion-icon name="arrow-dropright"></ion-icon>
-          Show
-        </button>
-    </ion-item> 
-    <button id="vin-button1" ion-button color="primary" block (click)="saveVin()">
-      {{'general.save' | translate }}
-    </button>
-    <button id="vin-button3" ion-button color="secondary" block (click)="addComment()">
-      {{'general.add' | translate }} {{'wine.comment' | translate }}
-    </button>
-    <button id="vin-button2" ion-button color="danger" block (click)="deleteVin()">
-      {{'general.suppress' | translate }}
-    </button>
+  </ion-item>
+  <ion-item id="vin-input12">
+      <ion-label>
+        {{'wine.apogee' | translate }}
+      </ion-label>
+      <ion-input [(ngModel)]="vin.apogee" type="text" placeholder="ex: 2020-2025" text-right></ion-input>
+  </ion-item>
+  <ion-item id="vin-input14">
+      <ion-label>
+        {{'wine.GWSScore' | translate }}
+      </ion-label>
+      <ion-input [(ngModel)]="vin.GWSScore" type="number" placeholder="85.7" text-right></ion-input>
+      <button ion-button outline item-end (click)="getGWSScore()">fecth</button>
+  </ion-item>
+  <ion-item *ngIf="vin.history && vin.history.length>0" (click)="showHistory()">
+      {{'wine.history' | translate }}
+      <button ion-button item-end outline icon-end>
+        <ion-icon name="arrow-dropright"></ion-icon>
+        Show
+      </button>
+  </ion-item> 
+  <button id="vin-button1" ion-button color="primary" block (click)="saveVin()">
+    {{'general.save' | translate }}
+  </button>
+  <button id="vin-button3" ion-button color="secondary" block (click)="addComment()">
+    {{'general.add' | translate }} {{'wine.comment' | translate }}
+  </button>
+  <button id="vin-button2" ion-button color="danger" block (click)="deleteVin()">
+    {{'general.suppress' | translate }}
+  </button>
 </ion-content>

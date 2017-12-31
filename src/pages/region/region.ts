@@ -68,9 +68,11 @@ export class RegionPage {
   public saveOrigine() {
     console.debug("[Origine - saveOrigine]entering");    
     this.submitted = true;
+    let neworigine:boolean = this.origine._id?false:true;
     if (this.origineForm.valid) {
         // validation succeeded
         console.debug("[Origine - OrigineVin]Origine valid");
+        // Save new or modified origine
         this.pouch.saveDoc(this.cleanValidatorModelObject(this.origine),'origine')
         .then(response => {
                 if (response.ok) { 
@@ -78,6 +80,17 @@ export class RegionPage {
                     //this.pouch.loadOriginesRefList();
                     this.alertService.success(this.translate.instant('general.dataSaved'),SearchPage,"");
                     //this.navCtrl.push(SearchPage)
+                    // If we modify an origine, update all wines where this origine is used
+                    if (!neworigine) {
+                      this.pouch.getDocsOfType('vin').then(vinlist => {
+                        vinlist.map(v => {
+                          if (v.origine._id == response.id) {
+                            v.origine = this.cleanValidatorModelObject(this.origine);
+                            this.pouch.saveDoc(v,'vin');
+                          }
+                        });
+                      })
+                    } 
                 } else {
                     this.alertService.error(this.translate.instant('general.DBError'),SearchPage,"");
                 }

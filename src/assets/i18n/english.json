@@ -43,7 +43,9 @@
     "addedExtractedOn":"Wine added or extracted on",
     "difference":"difference",
     "or":"or",
-    "minmax":"must 4 digit length"
+    "minmax":"must 4 digit length",
+    "apogee":"apogee",
+    "GWSScore": "GWS Score"
   },
   "appellation":{
     "appellation":"appellation",
