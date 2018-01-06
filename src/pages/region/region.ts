@@ -6,7 +6,7 @@ import { NavController, NavParams, AlertController } from 'ionic-angular';
 import { PouchdbService } from './../../services/pouchdb.service';
 import { OrigineModel } from '../../models/cellar.model'
 import { AlertService } from './../../services/alert.service';
-import { Subject } from 'rxjs';
+import { LoggerService } from '../../services/log4ts/logger.service';
 
 @Component({
   selector: 'page-region',
@@ -19,7 +19,7 @@ export class RegionPage {
   public submitted:boolean;
   public origineForm:FormGroup;
   public newOrigine:boolean=false;
-  private testSubject:Subject<any>;
+  public list:boolean=true;
   
   constructor(public navCtrl: NavController,
               public navParams: NavParams, 
@@ -27,34 +27,38 @@ export class RegionPage {
               public formBuilder: FormBuilder,
               public alertService:AlertService,
               public alertController:AlertController,
-              public translate:TranslateService) {
+              public translate:TranslateService,
+              public logger:LoggerService) {
       this.origineForm = formBuilder.group({
         pays: ['',Validators.required],
         region: ['',Validators.required]    
-    });
-    this.submitted = false;
-    this.testSubject = new Subject();
+      } ,{ asyncValidator: this.noDouble.bind(this) } );
+      this.submitted = false;
           
   }
 
   public ionViewDidLoad() {
-    console.log("[Region - ionViewDidLoad]called");
-    // If we come on this page on the first time, the parameter action should be set to 'list', so that we get the see the list of origines 
+    //this.logger.log("[Region - ionViewDidLoad]called");
+    // Loading Origine list for validation (double) purposes in case of edit action and to display in case of list action
+    this.pouch.getDocsOfType('origine')
+    .then(origines => this.origineList = origines.sort((a,b) => { return ((a.pays+a.region)<(b.pays+b.region)?-1:1); } ) );      
+  // If we come on this page on the first time, the parameter action should be set to 'list', so that we get the see the list of origines 
     if (this.navParams.get('action')=='list') {
-      this.pouch.getDocsOfType('origine')
-      .then(origines => this.origineList = origines);      
+      this.list = true;
     } 
     // if we come on this page with the action parameter set to 'edit', this means that we either want to add a new origine (id parameter is not set)
     // or edit an existing one (id parameter is set)
     else {
+      this.list=false;
       if (this.navParams.get('id')) {
         this.pouch.getDoc(this.navParams.get('id'))
         .then(origine => {
             this.origine = origine;
-            console.log("[Origine - ionViewDidLoad]Origine loaded : "+JSON.stringify(this.origine));
+            this.logger.log("[Origine - ionViewDidLoad]Origine loaded : "+JSON.stringify(this.origine));
         });
-      } else 
+      } else {
         this.newOrigine = true;
+      }
     }
   }
 
@@ -102,33 +106,49 @@ export class RegionPage {
 }
 
  public deleteOrigine() {
-  let alert = this.alertController.create({
-      title: this.translate.instant('general.confirm'),
-      message: this.translate.instant('general.sure'),
-      buttons: [
-        {
-          text: this.translate.instant('general.cancel'),
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancel clicked');
-          }
-        },
-        {
-          text: this.translate.instant('general.ok'),
-          handler: () => {
-              this.pouch.deleteDoc(this.origine).then(response => {
-                  if (response.ok) {
-                      //this.pouch.loadOriginesRefList();                    
-                      this.alertService.success(this.translate.instant('origin.originDeleted'),SearchPage,'');
-                    } else {
-                      this.alertService.error(this.translate.instant('origin.originNotDeleted'),undefined,'');                        
+  // Check that this origine isn't used in the database 
+  let used=false;
+  if (this.origine._id) {
+    this.pouch.getDocsOfType('vin')
+    .then(vins => {
+        vins.forEach(vin => {
+          if (vin.origine._id == this.origine._id)
+            used = true;
+        })
+        if (!used) {
+          let alert = this.alertController.create({
+              title: this.translate.instant('general.confirm'),
+              message: this.translate.instant('general.sure'),
+              buttons: [
+                {
+                  text: this.translate.instant('general.cancel'),
+                  role: 'cancel',
+                  handler: () => {
+                    this.logger.log('Cancel clicked');
                   }
-              });
-          }
+                },
+                {
+                  text: this.translate.instant('general.ok'),
+                  handler: () => {
+                      this.pouch.deleteDoc(this.origine).then(response => {
+                          if (response.ok) {
+                              //this.pouch.loadOriginesRefList();                    
+                              this.alertService.success(this.translate.instant('origin.originDeleted'),SearchPage,'');
+                            } else {
+                              this.alertService.error(this.translate.instant('origin.originNotDeleted'),undefined,'');                        
+                          }
+                      });
+                  }
+                }
+              ]
+          });
+          alert.present();      
+        } else {
+          this.alertService.error(this.translate.instant('origin.cantDeleteBecauseUsed'),undefined,'dialog');
         }
-      ]
-  });
-  alert.present();
+      }
+    );
+  }
 }
 
   private cleanValidatorModelObject(obj) {
@@ -137,7 +157,22 @@ export class RegionPage {
         if (key.charAt(0)!='_' || (key=='_id' && obj[key])) result[key]=obj[key];
     }
     return result;
-}
+  }
 
+  private noDouble(group: FormGroup) {
+    return new Promise( resolve => {
+      this.logger.log("form valid ? : "+group.valid);
+      if(!group.controls.pays || !group.controls.region) resolve(null);
+      let pays = group.value.pays;
+      let region = group.value.region;
+      this.origineList.map(o => {
+        if (o.pays == pays && o.region == region) {
+          this.logger.log("[Region.noDouble]double detected");
+          resolve({double:true});
+        } 
+      });
+      resolve(null);
+    });
+  }
 
 }

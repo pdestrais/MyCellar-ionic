@@ -1,3 +1,4 @@
+import { LoggerService } from './../../services/log4ts/logger.service';
 import { Subject } from 'rxjs/Subject';
 import { TranslateService } from '@ngx-translate/core';
 import { Component,OnInit,OnDestroy } from '@angular/core';
@@ -22,12 +23,14 @@ export class VinPage implements OnInit,OnDestroy {
   public nbreAvantUpdate:number = 0;
   public newWine:boolean = true;
   public vin:VinModel;
+  public vinsMap:Map<any,object>;
   public origines:Array<any>=[];
   public appellations:Array<any>=[];
   public types:Array<any>=[];
   public comment:string = '';
   public errors:Array<any>;   
   public vinForm:FormGroup;
+  public nameYearForm:FormGroup;
   public submitted:boolean;
   private obs:Subject<string> = new Subject();
   public priceRegExp:RegExp = new RegExp("^[0-9]+(,[0-9]{1,2})?$");
@@ -40,46 +43,47 @@ export class VinPage implements OnInit,OnDestroy {
               public translate:TranslateService,
               public alertController:AlertController,
               public modalCtrl:ModalController,
-              public http:Http) {
-    console.log('[VinPage constructor]params is :'+JSON.stringify(navParams));
+              public http:Http,
+              public logger:LoggerService) {
+    this.logger.log('[VinPage constructor]params is :'+JSON.stringify(navParams));
     this.vin = new VinModel('','','',0,0,0,'','','','',[],'',new AppellationModel('','',''),new OrigineModel('','',''),new TypeModel('',''),'',0,[]);
+    this.pouch.getDocsOfType('vin').then(vins => this.vinsMap = new Map(vins.map((v) => [v.nom+v.annee, v])));
+    this.nameYearForm = formBuilder.group({
+            nom: ['',Validators.required],
+            annee: ['',Validators.compose([Validators.minLength(4),Validators.maxLength(4), Validators.pattern('[0-9]*'), Validators.required])],
+        },
+        { validator :this.noDouble.bind(this) }
+    );
     this.vinForm = formBuilder.group({
-        nom: ['',Validators.required],
-        annee: ['',Validators.compose([Validators.minLength(4),Validators.maxLength(4), Validators.pattern('[0-9]*'), Validators.required])],
-        type: ['',Validators.required],
-        origine: ['',Validators.required],
-        appellation: ['',Validators.required],
-        nbreBouteillesAchat: [0,Validators.required],
-        nbreBouteillesReste: [0,Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
-        prixAchat: [0,Validators.compose([Validators.pattern('^[0-9]+((,[0-9]{1,2})|(.[0-9]{1,2}))?$'), Validators.required])],
-//        prixAchat: [0,Validators.required],
-        dateAchat: ['',Validators.required],
-        localisation: ['',Validators.required]      
-    });
+            nameYearForm : this.nameYearForm,
+            type: ['',Validators.required],
+            origine: ['',Validators.required],
+            appellation: ['',Validators.required],
+            nbreBouteillesAchat: [0,Validators.required],
+            nbreBouteillesReste: [0,Validators.compose([Validators.pattern('[0-9]*'), Validators.required])],
+            prixAchat: [0,Validators.compose([Validators.pattern('^[0-9]+((,[0-9]{1,2})|(.[0-9]{1,2}))?$'), Validators.required])],
+    //        prixAchat: [0,Validators.required],
+            dateAchat: ['',Validators.required],
+            localisation: ['',Validators.required],
+            apogee:['',Validators.pattern('^[0-9]{4,4}-[0-9]{4,4}$')]      
+        }
+    );
     this.submitted = false;
   }   
   
   public ngOnInit() {
-    console.log("[Vin - ngOnInit]called");
+    this.logger.log("[Vin.ngOnInit]called");
     this.paramId = this.navParams.get('id');
+    // event emitted when types are loaded
     this.obs.subscribe(message => {
-        console.log('ngOnInit Subject emitted test message '+message)
         if (this.paramId) {
            this.pouch.getDoc(this.paramId)
            .then(vin => {
-               console.log("vin "+JSON.stringify(vin));
+               this.logger.log("vin "+JSON.stringify(vin));
                Object.assign(this.vin, vin); 
                this.nbreAvantUpdate=this.vin.nbreBouteillesReste; 
                this.newWine=false;
-               // Updating appellation and origine with their updated values
-/*                this.pouch.getDoc(this.vin.appellation._id)
-               .then(appellation => this.vin.appellation = <AppellationModel>this.pouch.cleanModelObject(appellation));
-               this.pouch.getDoc(this.vin.origine._id)
-               .then(origine => this.vin.origine = <OrigineModel>this.pouch.cleanModelObject(origine));               
-               this.pouch.getDoc(this.vin.type._id)
-               .then(type => { this.vin.type = <TypeModel>this.pouch.cleanModelObject(type); 
-                            });               
- */               console.log("[Vin - ngOnInit]Vin loaded : "+JSON.stringify(this.vin));
+               this.logger.log("[Vin.ngOnInit]Vin loaded : "+JSON.stringify(this.vin));
            });
        } else {
            let now = moment();
@@ -88,7 +92,7 @@ export class VinPage implements OnInit,OnDestroy {
                let preselectedType = this.types.find(e => {
                                                                return (e.nom == "Rouge" || e.nom == "Red")
                                                            });
-                //console.log("preselected type is : "+JSON.stringify(preselectedType));
+                //this.logger.log("preselected type is : "+JSON.stringify(preselectedType));
                 if (preselectedType)
                     this.vin = new VinModel('','','',0,0,0,now.format('YYYY-MM-DD'),'','','',[],'',
                                        new AppellationModel('','',''),
@@ -113,14 +117,14 @@ export class VinPage implements OnInit,OnDestroy {
                        this.origines.sort((a,b) => {
                             return ((a.pays+a.region)<(b.pays+b.region)?-1:1); 
                         });
-                       //console.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
+                       //this.logger.log('[VinPage constructor]origines is :'+JSON.stringify(this.origines));
                    });
    this.pouch.getDocsOfType('appellation')
    .then(result => {   this.appellations = result;
                         this.appellations.sort((a,b) => {
                             return ((a.courte+a.longue)<(b.courte+b.longue)?-1:1); 
                         });
-                        //console.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
+                        //this.logger.log('[VinPage constructor]appellations is :'+JSON.stringify(this.appellations));
                    });
        
    this.pouch.getDocsOfType('type')
@@ -128,30 +132,30 @@ export class VinPage implements OnInit,OnDestroy {
                         this.types.sort((a,b) => {
                             return ((a.nom)<(b.nom)?-1:1); 
                         });
-                    //console.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
+                    //this.logger.log('[VinPage constructor]types is :'+JSON.stringify(this.types));
                        this.obs.next('typeLoaded');
                    });  
  }
 
   public ngOnDestroy() {
-    console.log("[Vin - ngOnDestroy]called");
+    this.logger.log("[Vin.ngOnDestroy]called");
     this.obs.unsubscribe();
   }
 
   public ionViewWillEnter() {
-    console.log("[Vin - ionViewWillEnter]called");    
+    this.logger.log("[Vin.ionViewWillEnter]called");    
   }
 
   public ionViewDidLoad() {
-    console.log("[Vin - ionViewDidLoad]called");
+    this.logger.log("[Vin.ionViewDidLoad]called");
   }
 
   public saveVin() {
-    console.debug("[Vin - saveVin]entering");    
+    this.logger.debug("[Vin.saveVin]entering");    
     this.submitted = true;
     if (this.vinForm.valid) {
         // validation succeeded
-        console.debug("[Vin - saveVin]vin valid");
+        this.logger.debug("[Vin.saveVin]vin valid");
         this.vin.lastUpdated = new Date().toISOString();
         if (this.newWine) {
             this.vin.history.push({type:'creation',difference:this.vin.nbreBouteillesReste,date:this.vin.lastUpdated,comment:''});
@@ -166,7 +170,7 @@ export class VinPage implements OnInit,OnDestroy {
         this.pouch.saveDoc(this.vin,'vin')
         .then(response => {
                 if (response.ok) { 
-                    console.debug("[Vin - saveVin]vin "+ JSON.stringify(this.vin)+"saved");
+                    this.logger.debug("[Vin.saveVin]vin "+ JSON.stringify(this.vin)+"saved");
                     this.alertService.success(this.translate.instant('general.dataSaved'),SearchPage);
                     //this.navCtrl.push(SearchPage)
                 } else {
@@ -174,7 +178,7 @@ export class VinPage implements OnInit,OnDestroy {
                 }
         });
     } else {
-        console.debug("[Vin - saveVin]vin invalid");
+        this.logger.debug("[Vin.saveVin]vin invalid");
         this.alertService.error(this.translate.instant('general.invalidData'),null);
     }
 }
@@ -188,7 +192,7 @@ public deleteVin() {
             text: this.translate.instant('general.cancel'),
             role: 'cancel',
             handler: () => {
-              console.log('Cancel clicked');
+              this.logger.log('Cancel clicked');
             }
           },
           {
@@ -231,15 +235,15 @@ public deleteVin() {
                 text: this.translate.instant('general.cancel'),
                 role: 'cancel',
                 handler: data => {
-                    console.log('Cancel clicked');
+                    this.logger.log('Cancel clicked');
                 }
                 },
                 {
                 text: 'OK',
                 handler: data => { 
-                        console.log('add comment data : '+data);
+                        this.logger.log('add comment data : '+data);
                         this.vin.remarque = data.comment;
-                        console.log("add comment - save vin");
+                        this.logger.log("add comment - save vin");
                         this.saveVin();
                     }
                 }
@@ -269,31 +273,43 @@ public deleteVin() {
             this.vin[attribute] = this.vin[attribute].replace(",", '.');
             this.vin[attribute] = parseFloat(this.vin[attribute]);    
         }
-        console.log(attribute+' changed: '+this.vin[attribute]);
+        this.logger.log('[Vin.toNumber]'+attribute+' changed: '+this.vin[attribute]);
       }
 
     public getGWSScore(){
-        console.log("getting GWS score");
+        this.logger.log("[Vin.getGWSScore]called");
         // Create url
         let prefix = '/api/';
         let url = prefix+this.cleanForUrl(this.vin.nom)+"-"+this.cleanForUrl(this.vin.origine.region)+"/"+this.vin.annee+"/";
         //let url1 = '/api/chateau-maucaillou-moulis-en-medoc/2009/'
+        this.logger.log("[Vin.getGWSScore]url :"+url);
         this.http.get(url)
                     .map((res:Response,index:number) => res.text()).subscribe((html) => {
                         let root = HTMLParser.parse(html);
                         let score:HTMLElement = root.querySelector('h2.score');
                         let firstNode:any = score.firstChild;
                         let rawScoreTxt:string = firstNode.rawText;
-                        if (!rawScoreTxt.search("not enough data"))
+                        if (rawScoreTxt.search("not enough data")==-1)
                             this.vin.GWSScore = parseFloat(rawScoreTxt.trim());
                     },
-                (error) => {console.log("http get error : "+JSON.stringify(error.status))});
+                (error) => {this.logger.log("http get error : "+JSON.stringify(error.status))});
     
     }
 
     private cleanForUrl(text:string){
-        return text.toLowerCase().replace(/ /g,"-").replace(/'/g,"").replace(/â/g,"a").replace(/é/g,"e").replace(/è/g,"e").replace(/ê/g,"e").replace(/û/g,"u").replace(/ô/g,"o").replace(/î/g,"i")
+        return text.trim().toLowerCase().replace(/ /g,"-").replace(/'/g,"").replace(/â/g,"a").replace(/é/g,"e").replace(/è/g,"e").replace(/ê/g,"e").replace(/û/g,"u").replace(/ô/g,"o").replace(/î/g,"i");
     }
+
+    private noDouble(group: FormGroup) {
+        this.logger.debug("nodouble called");
+        if(!group.controls.nom || !group.controls.annee) return(null);
+        let testKey = group.value.nom+group.value.annee
+        if (this.vinsMap && this.vinsMap.has(testKey)) {
+        this.logger.log("[Vin.noDouble]double detected");
+        return({double:true});
+        } else
+        return(null);
+    }    
      
 }
 
@@ -335,10 +351,11 @@ export class ModalPage {
     constructor(
       public platform: Platform,
       public params: NavParams,
-      public viewCtrl: ViewController
+      public viewCtrl: ViewController,
+      public logger: LoggerService
     ) {
       this.vin = this.params.get('vin');
-      console.log("[ModalPage - constructor]got vin as param : "+JSON.stringify(this.vin));
+      this.logger.log("[ModalPage - constructor]got vin as param : "+JSON.stringify(this.vin));
     }
   
     dismiss() {

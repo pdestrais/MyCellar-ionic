@@ -11,26 +11,29 @@
 <ion-content padding id="page2">
   <alert></alert>
   <form [formGroup]="vinForm" id="vin-form4">
-    <ion-item id="vin-input4">
-      <ion-label>
-        {{'wine.name' | translate }}
-      </ion-label>
-      <ion-input [(ngModel)]="vin.nom" type="text" placeholder="Nom du vin" formControlName="nom" text-right
-      [class.invalid]="!vinForm.controls.nom.valid && (vinForm.controls.nom.dirty || submitted)"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="!vinForm.controls.nom.valid  && (vinForm.controls.nom.dirty || submitted)">
-      <p class="invalid">{{'wine.name' | translate }} {{"general.required" | translate }}</p>
-    </ion-item>
-    <ion-item id="vin-input5">
-      <ion-label>
-        {{'wine.year' | translate }}
-      </ion-label>
-      <ion-input [(ngModel)]="vin.annee" type="text" placeholder="Année" formControlName="annee" text-right
-      [class.invalid]="!vinForm.controls.annee.valid && (vinForm.controls.annee.dirty || submitted)"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="!vinForm.controls.annee.valid  && (vinForm.controls.annee.dirty || submitted)">
-        <p class="invalid">{{'wine.year' | translate }} {{"general.required" | translate }} {{'general.or' | translate }} {{'wine.minmax' | translate }}</p>
-    </ion-item>
+    <form [formGroup]="nameYearForm">
+      <ion-item id="vin-input4">
+        <ion-label>
+          {{'wine.name' | translate }}
+        </ion-label>
+        <ion-input [(ngModel)]="nameYearForm.nom" type="text" placeholder="Nom du vin" formControlName="nom" text-right
+        [class.invalid]="!nameYearForm.controls.nom.valid && (nameYearForm.controls.nom.dirty || submitted)"></ion-input>
+      </ion-item>
+      <ion-item *ngIf="!nameYearForm.controls.nom.valid  && (nameYearForm.controls.nom.dirty || submitted)">
+        <p class="invalid">{{'wine.name' | translate }} {{"general.required" | translate }}</p>
+      </ion-item>
+      <ion-item id="vin-input5">
+        <ion-label>
+          {{'wine.year' | translate }}
+        </ion-label>
+        <ion-input [(ngModel)]="vin.annee" type="text" placeholder="Année" formControlName="annee" text-right
+        [class.invalid]="!nameYearForm.controls.annee.valid && (nameYearForm.controls.annee.dirty || submitted)"></ion-input>
+      </ion-item>
+      <ion-item *ngIf="!nameYearForm.controls.annee.valid  && (nameYearForm.controls.annee.dirty || submitted)">
+          <p class="invalid">{{'wine.year' | translate }} {{"general.required" | translate }} {{'general.or' | translate }} {{'wine.minmax' | translate }}</p>
+      </ion-item>
+      <p *ngIf="vinForm.get('nameYearForm').hasError('double')" [class.invalid]="vinForm.get('nameYearForm').hasError('double')">{{ 'wine.double' | translate }}</p>
+    </form>
     <ion-item id="vin-select1">
       <ion-label>
         {{'wine.type' | translate }}
@@ -123,34 +126,38 @@
     <ion-item *ngIf="!vinForm.controls.localisation.valid  && (vinForm.controls.localisation.dirty || submitted)">
       <p class="invalid">{{'wine.location' | translate }} {{"general.required" | translate }}</p>
     </ion-item>
+    <ion-item id="vin-input11">
+        <ion-label>
+          {{'wine.contains' | translate }}
+        </ion-label>
+        <ion-input [(ngModel)]="vin.contenance" type="text" placeholder="75 - 150 cl" text-right [ngModelOptions]="{standalone: true}"></ion-input>
+    </ion-item>
+    <ion-item id="vin-input12">
+        <ion-label>
+          {{'wine.apogee' | translate }}
+        </ion-label>
+        <ion-input [(ngModel)]="vin.apogee" type="text" placeholder="ex: 2020-2025" formControlName="apogee" text-right      
+          [class.invalid]="!vinForm.controls.apogee.valid && (vinForm.controls.apogee.dirty || submitted)"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="!vinForm.controls.apogee.valid  && (vinForm.controls.apogee.dirty || submitted)">
+        <p class="invalid">{{'wine.apogee' | translate }} {{"wine.apogeeFormat" | translate }}</p>
+      </ion-item>
+    <ion-item id="vin-input14">
+        <ion-label>
+          {{'wine.GWSScore' | translate }}
+        </ion-label>
+        <ion-input [(ngModel)]="vin.GWSScore" type="number" placeholder="85.7" text-right [ngModelOptions]="{standalone: true}"></ion-input>
+        <button ion-button outline item-end (click)="getGWSScore()">fecth</button>
+    </ion-item>
+    <ion-item *ngIf="vin.history && vin.history.length>0" (click)="showHistory()">
+        {{'wine.history' | translate }}
+        <button ion-button item-end outline icon-end>
+          <ion-icon name="arrow-dropright"></ion-icon>
+          Show
+        </button>
+    </ion-item> 
   </form>
-  <ion-item id="vin-input11">
-      <ion-label>
-        {{'wine.contains' | translate }}
-      </ion-label>
-      <ion-input [(ngModel)]="vin.contenance" type="text" placeholder="75 - 150 cl" text-right></ion-input>
-  </ion-item>
-  <ion-item id="vin-input12">
-      <ion-label>
-        {{'wine.apogee' | translate }}
-      </ion-label>
-      <ion-input [(ngModel)]="vin.apogee" type="text" placeholder="ex: 2020-2025" text-right></ion-input>
-  </ion-item>
-  <ion-item id="vin-input14">
-      <ion-label>
-        {{'wine.GWSScore' | translate }}
-      </ion-label>
-      <ion-input [(ngModel)]="vin.GWSScore" type="number" placeholder="85.7" text-right></ion-input>
-      <button ion-button outline item-end (click)="getGWSScore()">fecth</button>
-  </ion-item>
-  <ion-item *ngIf="vin.history && vin.history.length>0" (click)="showHistory()">
-      {{'wine.history' | translate }}
-      <button ion-button item-end outline icon-end>
-        <ion-icon name="arrow-dropright"></ion-icon>
-        Show
-      </button>
-  </ion-item> 
-  <button id="vin-button1" ion-button color="primary" block (click)="saveVin()">
+  <button [disabled]="!vinForm.valid" id="vin-button1" ion-button color="primary" block (click)="saveVin()">
     {{'general.save' | translate }}
   </button>
   <button id="vin-button3" ion-button color="secondary" block (click)="addComment()">

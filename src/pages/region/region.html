@@ -9,7 +9,7 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page5">
-    <div *ngIf="origineList">
+    <div *ngIf="list">
       <div *ngIf="origineList.length>0">
           <ion-list>
             <ion-item *ngFor="let origine of origineList" (click)="editOrigine(origine)">
@@ -24,7 +24,7 @@
           {{'general.add' | translate }} {{'origin.region' | translate }}
         </button>
     </div>
-    <div *ngIf="newOrigine || (origine._id && origine._id !='')">
+    <div *ngIf="!list">
         <alert></alert>
         <form [formGroup]="origineForm" id="origine-form4">
           <ion-item id="origine-input1">
@@ -44,13 +44,15 @@
             <ion-input [(ngModel)]="origine.region" type="text" placeholder="{{ 'origin.originRegion' | translate }}" formControlName="region" text-right
             [class.invalid]="!origineForm.controls.region.valid && (origineForm.controls.region.dirty || submitted)"></ion-input>
           </ion-item>
-        </form>
-        <button id="region-button5" ion-button color="primary" block (click)="saveOrigine(origine)">
-                  {{'general.save' | translate }}
-        </button>
-        <button id="region-button5" ion-button color="danger" block (click)="deleteOrigine(origine)">
-            {{'general.suppress' | translate }}
-        </button>
+          <p *ngIf="origineForm.hasError('double')" [class.invalid]="origineForm.hasError('double')">{{ 'origin.origineDouble' | translate }}</p>
+          <button [disabled]="!origineForm.valid" id="region-button5" ion-button color="primary" block (click)="saveOrigine(origine)">
+<!--             <button [disabled]="!origineForm.valid" id="region-button5" ion-button color="primary" block (click)="saveOrigine(origine)">
+ -->              {{'general.save' | translate }}
+          </button>
+          <button *ngIf="!newOrigine" id="region-button5" ion-button color="danger" block (click)="deleteOrigine(origine)">
+              {{'general.suppress' | translate }}
+          </button>
+      </form>
   </div>
     
 </ion-content>

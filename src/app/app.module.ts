@@ -16,10 +16,12 @@ import { StatsPage } from '../pages/stats/stats';
 import { SearchPage } from '../pages/search/search';
 import { AlertComponent } from '../pages/alert/alert.component';
 import { ModalPage } from '../pages/vin/vin'
+import { AboutPage } from '../pages/about/about';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import { LoggerService } from '../services/logger.service';
+import { LoggerService } from '../services/log4ts/logger.service';
+import { ConsoleLoggerService } from '../services/log4ts/console-logger.service';
 import { SimpleCacheService } from '../services/simpleCache.service';
 import { PouchdbService } from '../services/pouchdb.service';
 import { AlertService } from '../services/alert.service';
@@ -51,7 +53,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     StatsPage,
     SearchPage,
     AlertComponent,
-    ModalPage
+    ModalPage,
+    AboutPage
   ],
   imports: [
     BrowserModule,
@@ -81,7 +84,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     RegionPage,
     StatsPage,
     SearchPage,
-    ModalPage
+    ModalPage,
+    AboutPage
   ],
   providers: [
     StatusBar,
@@ -90,7 +94,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     LoggerService,
     SimpleCacheService,
     PouchdbService,
-    AlertService
+    AlertService,
+    { provide: LoggerService, useClass: ConsoleLoggerService }
   ]
 })
 export class AppModule {}

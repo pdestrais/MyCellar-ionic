@@ -8,7 +8,8 @@
     "type":"type",
     "report":"rapport",
     "stats":"statistiques",
-    "search":"Recherche"
+    "search":"Recherche",
+    "about":"A propos"
   },
   "config":{
     "dbServerURL": "URL server DB distant",
@@ -45,7 +46,8 @@
     "or":"ou",
     "minmax":"doit avoir au moins 4 chiffres",
     "apogee":"apogee",
-    "GWSScore": "Score GWS (Global Wine System)"
+    "GWSScore": "Score GWS (Global Wine System)",
+    "double":"Un vin avec le même nom et la même année existe déjà"
   },
   "appellation":{
     "appellation":"appellation",
@@ -54,7 +56,9 @@
     "appellationShort":"Nom appellation court",
     "appellationLong":"Nom appellation long",
     "appellationDeleted":"L'appellation est effacée",
-    "appellationNotDeleted":"L'appellation n'est pas effacée"
+    "appellationNotDeleted":"L'appellation n'est pas effacée",
+    "double":"Une appellation avec la même nom court et long existe déjà",
+    "cantDeleteBecauseUsed":"Cette appellation ne peut être effacée car un vin utilisant cette appellation existe dans la base de données"
   },
   "origin":{
     "region":"région",
@@ -62,7 +66,9 @@
     "originCountry":"Pays d'origine",
     "originRegion":"Région d'origine",
     "originDeleted":"L'origine est effacée",
-    "originNotDeleted":"L'origine n'est pas effacée"
+    "originNotDeleted":"L'origine n'est pas effacée",
+    "origineDouble":"Cette origine existe déjà dans la base de données",
+    "cantDeleteBecauseUsed":"Cette origine ne peut être effacée car un vin utilisant cette origine existe dans la base de données"
   },
   "stats":{
     "from":"à partir de ",
@@ -76,6 +82,16 @@
   "search":{
     "inStock":"vin en stock",
     "outOfStock":"vin plus en stock"
+  },
+  "about":{
+    "appInfo": "Informations sur l'application",
+    "appVersion": "Version :",
+    "appName":"Nom"
+  },
+  "type":{
+    "cantDeleteBecauseUsed":"This type can't be deleted because at least one wine with this type still exist in the cellar database",
+    "type":"type",
+    "double":"A type with the same name already exists"
   },
   "general":{
     "save":"sauver",
@@ -105,5 +121,4 @@
   "french":"Français",
   "red":"Rouge",
   "white":"Blanc",
-  "type":"type"
 }

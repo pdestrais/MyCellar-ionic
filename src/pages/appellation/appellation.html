@@ -9,7 +9,7 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding id="page5">
-  <div *ngIf="appellationList">
+  <div *ngIf="list">
       <div *ngIf="appellationList.length>0">
         <ion-list>
           <ion-item *ngFor="let appellation of appellationList" (click)="editAppellation(appellation)">
@@ -24,7 +24,7 @@
           {{'general.add' | translate }} {{'appellation.appellation' | translate }}
         </button>
   </div>
-  <div *ngIf="newAppellation || (appellation._id && appellation._id !='')">
+  <div *ngIf="!list">
       <alert></alert>
       <form [formGroup]="appellationForm" id="appellation-form4">
         <ion-item id="appellation-input1">
@@ -44,8 +44,9 @@
           <ion-input [(ngModel)]="appellation.longue" type="text" placeholder="{{ 'appellation.appellationLong' | translate }}" formControlName="longue" text-right
           [class.invalid]="!appellationForm.controls.longue.valid && (appellationForm.controls.longue.dirty || submitted)"></ion-input>
         </ion-item>
+        <p *ngIf="appellationForm.hasError('double')" [class.invalid]=true>{{ 'appellation.double' | translate }}</p>
       </form>
-      <button id="longue-button5" ion-button color="primary" block (click)="saveAppellation(appellation)">
+      <button [disabled]="!appellationForm.valid" id="longue-button5" ion-button color="primary" block (click)="saveAppellation(appellation)">
                 {{'general.save' | translate }}
       </button>
       <button id="longue-button5" ion-button color="danger" block (click)="deleteAppellation(appellation)">

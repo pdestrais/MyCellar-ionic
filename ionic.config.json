@@ -1,5 +1,6 @@
 {
   "name": "MyCellar-ionic",
+  "version":"1.1.0",
   "app_id": "",
   "type": "ionic-angular",
   "integrations": {

@@ -1,3 +1,4 @@
+import { LoggerService } from './../../services/log4ts/logger.service';
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { PouchdbService } from '../../services/pouchdb.service'
@@ -25,22 +26,22 @@ export class SearchPage {
   public searching: boolean = false;
   public isInStock:boolean = true;
 
-  constructor(public pouchDB:PouchdbService, public navCtrl: NavController) {
+  constructor(public pouchDB:PouchdbService, public navCtrl: NavController, public logger: LoggerService) {
     this.searchControl = new FormControl();
   }
 
   ionViewDidLoad() {
-    console.debug("[SearchPage]in ionViewDidLoad");
+    this.logger.debug("[SearchPage.ionViewDidLoad]entering ");
     this.pouchDB.getPouchDBListener().subscribe((event) => {
       if (event.type == "activeSync") {
-        console.log('[SearchPage - ionViewDidLoad]change received : '+JSON.stringify(event.change));
+        this.logger.log('[SearchPage.ionViewDidLoad]change received : '+JSON.stringify(event.change));
         this.loadVins();
       } 
     });
  }
 
   ionViewWillEnter() {
-    console.debug("[SearchPage]in ionViewWillEnter");
+    this.logger.debug("[SearchPage.ionViewWillEnter]entering ");
     this.loading = true;
     this.loadVins();
     this.searchControl.valueChanges.debounceTime(500).subscribe(search => { 
@@ -54,14 +55,14 @@ export class SearchPage {
   }
 
   loadVins() {
-    console.debug("[SearchPage]in loadVins");
+    this.logger.debug("[SearchPage.loadVins]entering");
       this.pouchDB.getDocsOfType('vin').then((vins) => {
         this.vins = vins;
         this.loading = false; 
-        this.vins?console.log("[SearchPage - loadVins]Vin loaded - # vins : "+this.vins.length):console.log("[SearchPage - loadVins]Vin loaded - # vins : undefined");
+        this.vins?this.logger.log("[SearchPage.loadVins]Vin loaded - # vins : "+this.vins.length):this.logger.log("[SearchPage.loadVins]Vin loaded - # vins : undefined");
       })
       .catch((error) => {
-        console.log("[SearchPage - loadVins]problem to load vins");
+        this.logger.log("[SearchPage.loadVins]problem to load vins - error : "+JSON.stringify(error));
         //this.loading = false;
       });        
   }

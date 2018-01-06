@@ -12,6 +12,7 @@ import { RapportPDFPage } from '../pages/rapport-pdf/rapport-pdf';
 import { StatsPage } from '../pages/stats/stats';
 import { ConfigurationPage } from '../pages/configuration/configuration';
 import { SearchPage } from '../pages/search/search';
+import { AboutPage } from '../pages/about/about';
 import { PouchdbService } from '../services/pouchdb.service';
 
 @Component({
@@ -100,5 +101,9 @@ export class MyApp {
   goToConfiguration(params){
     if (!params) params = {};
     this.navCtrl.setRoot(ConfigurationPage);
+  }
+  goToAbout(params){
+    if (!params) params = {};
+    this.navCtrl.setRoot(AboutPage);
   }
 }
