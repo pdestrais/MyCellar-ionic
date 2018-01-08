@@ -1,4 +1,3 @@
-import { VinModel } from './../models/cellar.model';
 import { TranslateService } from '@ngx-translate/core';
 import { AlertService } from './alert.service';
 import { Injectable } from '@angular/core';

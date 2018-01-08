@@ -67,6 +67,7 @@ export class AppellationPage {
   private noDouble(group: FormGroup) {
     this.logger.debug("[Appellation.noDouble] called");
     if(!group.controls.courte || !group.controls.longue) return(null);
+    if (!group.controls.courte.dirty || !group.controls.courte.dirty) return(null);
     let testKey = group.value.courte+group.value.longue
     if (this.appellationsMap && this.appellationsMap.has(testKey)) {
     this.logger.log("[Appellation.noDouble]double detected");

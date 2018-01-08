@@ -1,6 +1,6 @@
 import { LoggerService } from './../../services/log4ts/logger.service';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 import { Http } from '@angular/http';
 
 /**
@@ -10,7 +10,7 @@ import { Http } from '@angular/http';
  * Ionic pages and navigation.
  */
 
-@IonicPage()
+/* @IonicPage() */
 @Component({
   selector: 'page-about',
   templateUrl: 'about.html',

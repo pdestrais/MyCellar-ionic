@@ -65,6 +65,7 @@ export class TypePage {
   private noDouble(group: FormGroup) {
     this.logger.debug("[Type.noDouble]nodouble called");
     if(!group.controls.nom) return(null);
+    if (!group.controls.nom.dirty) return(null);
     let testKey = group.value.nom;
     if (this.typesMap && this.typesMap.has(testKey)) {
       this.logger.log("[Type.noDouble]double detected");

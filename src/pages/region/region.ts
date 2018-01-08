@@ -163,6 +163,7 @@ export class RegionPage {
     return new Promise( resolve => {
       this.logger.log("form valid ? : "+group.valid);
       if(!group.controls.pays || !group.controls.region) resolve(null);
+      if (!group.controls.pays.dirty || !group.controls.region.dirty) return(null);
       let pays = group.value.pays;
       let region = group.value.region;
       this.origineList.map(o => {

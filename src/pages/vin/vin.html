@@ -16,7 +16,7 @@
         <ion-label>
           {{'wine.name' | translate }}
         </ion-label>
-        <ion-input [(ngModel)]="nameYearForm.nom" type="text" placeholder="Nom du vin" formControlName="nom" text-right
+        <ion-input [(ngModel)]="vin.nom" type="text" placeholder="Nom du vin" formControlName="nom" text-right
         [class.invalid]="!nameYearForm.controls.nom.valid && (nameYearForm.controls.nom.dirty || submitted)"></ion-input>
       </ion-item>
       <ion-item *ngIf="!nameYearForm.controls.nom.valid  && (nameYearForm.controls.nom.dirty || submitted)">

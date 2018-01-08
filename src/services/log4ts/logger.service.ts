@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-const noop = (): any => undefined;
+//const noop = (): any => undefined;
 
 export abstract class Logger {
 

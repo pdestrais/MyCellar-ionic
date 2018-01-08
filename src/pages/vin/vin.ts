@@ -303,6 +303,7 @@ public deleteVin() {
     private noDouble(group: FormGroup) {
         this.logger.debug("nodouble called");
         if(!group.controls.nom || !group.controls.annee) return(null);
+        if (!group.controls.nom.dirty || !group.controls.annee.dirty) return(null);
         let testKey = group.value.nom+group.value.annee
         if (this.vinsMap && this.vinsMap.has(testKey)) {
         this.logger.log("[Vin.noDouble]double detected");

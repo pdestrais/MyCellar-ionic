@@ -70,6 +70,11 @@
     "origineDouble":"This origin already exists in the database",
     "cantDeleteBecauseUsed":"This origin can't be deleted because one wine with this origin still exist in the cellar database"
   },
+  "report":{
+    "content":"Cellar content",
+    "readyForDrinking":"What's ready for drinking ?",
+    "readyForDrinkingHeader":"Wines at their apogee now :"
+  },
   "stats":{
     "from":"from",
     "to":"to",

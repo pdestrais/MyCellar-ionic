@@ -70,6 +70,11 @@
     "origineDouble":"Cette origine existe déjà dans la base de données",
     "cantDeleteBecauseUsed":"Cette origine ne peut être effacée car un vin utilisant cette origine existe dans la base de données"
   },
+  "report":{
+    "content":"Contenu de la cave",
+    "readyForDrinking":"Quels sont les vins à leur apogée ?",
+    "readyForDrinkingHeader":"Les vins suivants sont à leur apogée maintenant :"
+  },
   "stats":{
     "from":"à partir de ",
     "to":"jusqu'à",
